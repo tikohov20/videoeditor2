@@ -16,6 +16,15 @@ export const InitialY = 0;
 export const IndexMatrix =  [1,0,0,1,0,0];
 // preview
 export const DefaultImagePreviewSize = 6.25 // rem
+export const RemToMilliSeconds = 160; // lol
+
+export interface RenderItemPreview {
+    id: number,
+    src: string,
+    size: number,
+    start: number,
+    renderItemId: number
+}
 
 export interface RenderItem {
     id: number,
@@ -29,7 +38,10 @@ export interface RenderItem {
     height: number,
     x: number,
     y: number,
-    bitMap: CanvasImageSource
+    matrix: Array<number>,
+    bitMap: CanvasImageSource, //TODO rename to imageSource
+    isActive?: boolean,
+    preview: RenderItemPreview
 }
 
 export enum RenderItemTypes {
@@ -42,4 +54,8 @@ export interface RenderItemImage extends Modify<RenderItem, {
 
 export interface RenderItems extends Array<RenderItem>{}
 
+export interface CanvasSize {
+    width: number,
+    height: number
+}
 type Modify<T, R> = Omit<T, keyof R> & R;

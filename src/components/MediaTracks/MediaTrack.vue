@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {TrackItem} from "../../types.ts";
+import { TrackItem } from "../../types.ts";
 
 interface Props {
   track: TrackItem
@@ -8,6 +8,7 @@ interface Props {
 import { computed, Ref, ref } from "vue";
 import {ResizeDirection} from "./MediaTracksTypes.ts";
 import Draggable from "../Draggable.vue";
+import {usePlayerElementsStore} from "../../store";
 
 const { track } = defineProps<Props>();
 
@@ -15,6 +16,8 @@ const offset = ref(0);
 const left = ref(track.start);
 const width = ref(6.25);
 const resizing = ref(false) as Ref <ResizeDirection|boolean>
+
+const { moveTrackItem } = usePlayerElementsStore();
 
 const mediaTrackItemStyles = computed(() => {
   return {
@@ -33,8 +36,9 @@ const skalatoneStyles = computed(() => {
 })
 
 function handleDrag(e: number) {
-  left.value = left.value + e / 16;
-  left.value < 0 && (left.value = 0);
+  const offsetX = left.value + e / 16 < 0 ? 0 : left.value + e / 16;
+  moveTrackItem(track.renderItemId, offsetX); // TODO emit event and capture on top
+  // we should have some separation of concerns regarding store usage e.g only some type of components can access the store.
 }
 
 function resize(e: number) {
