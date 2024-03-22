@@ -5,14 +5,19 @@ export enum FileTypes {
 export enum HtmlFileTypes {
     IMAGE_PNG = "image/png",
     IMAGE_JPEG = "image/jpeg",
+    IMAGE_GIF = "image/gif"
 }
 
 // canvas data
 export const InfiniteDuration = -1;
 export const DefaultDuration = 1000; // ms
 export const DefaultStart = 0; // ms
+export const DefaultRotation = 0; // degrees
+export const DefaultOpacity = 1;
 export const InitialX = 0;
 export const InitialY = 0;
+
+// [ScaleX, ?, ?, ScaleY, OffsetX, OffsetY]
 export const IndexMatrix =  [1,0,0,1,0,0];
 // preview
 export const DefaultImagePreviewSize = 6.25 // rem
@@ -28,6 +33,7 @@ export interface RenderItemPreview {
 
 export interface RenderItem {
     id: number,
+    name: string,
     itemType: RenderItemTypes,
     maxDuration: number,
     duration: number,
@@ -38,18 +44,49 @@ export interface RenderItem {
     height: number,
     x: number,
     y: number,
-    matrix: Array<number>,
-    bitMap: CanvasImageSource, //TODO rename to imageSource
+    matrix: DOMMatrix,
+    rotation: number,
+    scaleX: number,
+    scaleY: number,
+    opacity: number,
+    bitMap: CanvasImageSource | Array<CanvasImageSource> | null, //TODO rename to imageSource
     isActive?: boolean,
-    preview: RenderItemPreview
+    preview: RenderItemPreview,
+    keyframes?: {
+        [key: number]: {
+            width?: number,
+            height?: number,
+            x?: number
+        }
+    }
 }
 
 export enum RenderItemTypes {
-    IMAGE = "image"
+    IMAGE = "image",
+    GIF = "gif",
+    TEXT = "text"
 }
 
 export interface RenderItemImage extends Modify<RenderItem, {
-    itemType: RenderItemTypes.IMAGE
+    itemType: RenderItemTypes.IMAGE,
+    bitMap: CanvasImageSource
+}> {}
+
+export interface RenderItemGif extends Modify<RenderItem, {
+    itemType: RenderItemTypes.GIF,
+    bitMap: Array<CanvasImageSource>
+    gifData: {
+        frameCount: number,
+        delay: number
+    }
+}> {}
+
+export interface RenderItemText extends Modify<RenderItem, {
+    itemType: RenderItemTypes.TEXT,
+    bitMap: null,
+    textData: {
+        text: string
+    }
 }> {}
 
 export interface RenderItems extends Array<RenderItem>{}

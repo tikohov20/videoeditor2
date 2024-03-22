@@ -17,5 +17,8 @@ const markingsEnd = computed(() => {
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
+.ruler {
+  height: 2rem;
+}
 </style>

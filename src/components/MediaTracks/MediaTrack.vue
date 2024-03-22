@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import { TrackItem } from "../../types.ts";
+import { CanvasItem, TrackItem } from "../../types.ts";
 
 interface Props {
-  track: TrackItem
+  track: TrackItem,
+  canvasItem: CanvasItem
 }
 
 import { computed, Ref, ref } from "vue";
-import {ResizeDirection} from "./MediaTracksTypes.ts";
+import { ResizeDirection } from "./MediaTracksTypes.ts";
 import Draggable from "../Draggable.vue";
-import {usePlayerElementsStore} from "../../store";
+import { usePlayerElementsStore } from "../../store";
 
-const { track } = defineProps<Props>();
+const { track, canvasItem } = defineProps<Props>();
 
 const offset = ref(0);
-const left = ref(track.start);
-const width = ref(6.25);
+const left = ref(canvasItem.start / 160); // TODO do we need canvasItem.start and preview.start ?
+const width = ref(canvasItem.duration / 160);
 const resizing = ref(false) as Ref <ResizeDirection|boolean>
-
-const { moveTrackItem } = usePlayerElementsStore();
+const { moveTrackItem, resizeTrackItem } = usePlayerElementsStore();
 
 const mediaTrackItemStyles = computed(() => {
   return {
@@ -42,14 +42,20 @@ function handleDrag(e: number) {
 }
 
 function resize(e: number) {
+  //TODO
+  let _left = 0;
+  let _width = 0;
+
   switch (resizing.value) {
     case ResizeDirection.Left:
-      left.value = left.value + e / 16;
-      width.value = width.value - e / 16;
+      _left = left.value + e / 16;
+      _width = width.value - e / 16;
       break;
     case ResizeDirection.Right:
-      width.value = width.value + e / 16;
+      _width = width.value + e / 16;
+      _left = left.value;
   }
+  resizeTrackItem(track.renderItemId, _left, _width); // TODO move one layer or 2 layers up
 }
 </script>
 

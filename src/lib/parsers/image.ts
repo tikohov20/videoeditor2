@@ -1,39 +1,45 @@
 import {
     CanvasSize,
     DefaultDuration,
-    DefaultImagePreviewSize,
-    DefaultStart, IndexMatrix,
+    DefaultImagePreviewSize, DefaultOpacity, DefaultRotation,
+    DefaultStart,
     InfiniteDuration,
     InitialX, InitialY, RenderItemImage, RenderItemPreview, RenderItemTypes
 } from "../shared/types.ts";
 
-import { createImageBitMapFromHtmlImg } from "../shared/helpers.ts";
+import {createImageBitMapFromHtmlImg, getIndexMatrix} from "../shared/helpers.ts";
 
-async function getCanvasData(img: HTMLImageElement, canvasSize: CanvasSize): Promise<RenderItemImage> {
-    const matrix = [...IndexMatrix];
-
-    if(img.height > canvasSize.height) {
-        matrix[0] = canvasSize.height / img.height;
-        matrix[3] = matrix[0]
-    }
-
+async function getCanvasData(img: HTMLImageElement, canvasSize: CanvasSize, name: string): Promise<RenderItemImage> {
     const id = Math.random();
+    const matrix = getIndexMatrix();
+
+    let scale = 1;
+
+    if (img.height > canvasSize.height) {
+        scale = canvasSize.height / img.height;
+    }
+    matrix.scaleSelf(scale);
 
     return {
         id,
+        name,
         itemType: RenderItemTypes.IMAGE,
         maxDuration: InfiniteDuration,
         duration: DefaultDuration,
         start: DefaultStart,
         initialWidth: img.width,
         initialHeight: img.height,
-        width: img.width,
-        height: img.height,
-        x: InitialX,
+        width: Math.round(img.width * matrix.a),
+        height: Math.round(img.height * matrix.d),
+        x: InitialX, // TODO this is bad idea ( I remembered )
         y: InitialY,
         bitMap: await createImageBitMapFromHtmlImg(img),
         preview: getPreviewData(img, id),
         matrix,
+        scaleX: scale,
+        scaleY: scale,
+        rotation: DefaultRotation,
+        opacity: DefaultOpacity
     }
 }
 
@@ -53,7 +59,7 @@ export function parse(file: File, canvasSize: CanvasSize): Promise<RenderItemIma
         img.src = URL.createObjectURL(file);
 
         img.onload = async function() {
-            const canvasItem = await getCanvasData(img, canvasSize);
+            const canvasItem = await getCanvasData(img, canvasSize, file.name);
             resolve(canvasItem);
         }
     });

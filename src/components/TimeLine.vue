@@ -4,10 +4,11 @@ import MediaTracks from "./MediaTracks/MediaTracks.vue";
 import Indicator from "./Indicator.vue";
 import { computed, ref } from "vue";
 import { TrackItems } from "../types.ts";
-import {usePlayerElementsStore} from "../store";
+import { usePlayerElementsStore } from "../store";
 let time = ref(0);
+
 interface Props {
-  tracks: TrackItems
+  tracks: TrackItems,
 }
 
 const state = usePlayerElementsStore();
@@ -29,12 +30,13 @@ const indicatorOffset = computed({
   <div class="timeline">
     <Ruler />
     <Indicator v-model="indicatorOffset" />
-    <MediaTracks :tracks="tracks" />
+    <MediaTracks :canvasItems="state.canvasItems" :tracks="tracks" />
   </div>
 </template>
 
 <style lang="scss" scoped>
 .timeline {
+  height: 100%;
   font-size: .625rem;
   overflow-x: auto;
   width: 100%;

@@ -1,17 +1,19 @@
 <script setup lang="ts">
 import MediaTrack from "./MediaTrack.vue";
-import {TrackItems} from "../../types.ts";
+import { CanvasItems, TrackItems } from "../../types.ts";
+
 interface Props {
-  tracks: TrackItems
+  tracks: TrackItems,
+  canvasItems: CanvasItems
 }
 
-const { tracks } = defineProps<Props>();
+const { canvasItems } = defineProps<Props>();
 
 </script>
 
 <template>
   <div class="media-tracks">
-    <MediaTrack v-for="mediaTrack in tracks" :key="mediaTrack.id" :track="mediaTrack"/>
+    <MediaTrack v-for="canvasItem in canvasItems" :key="canvasItem.preview.id" :track="canvasItem.preview" :canvasItem="canvasItem"/>
   </div>
 </template>
 

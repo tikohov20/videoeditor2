@@ -42,16 +42,18 @@ const markers = computed(() => {
 
 <style lang="scss" scoped>
 .markers {
+  height: 100%;
   display: flex;
 
   .marker {
     width: 6.25rem;
     flex-shrink: 0;
+    flex-direction: column;
+    display: flex;
+    justify-content: space-between;
   }
 
   .marker-timestamp {
-    margin-bottom: .5rem;
-
     > span {
       transform: translateX(-50%);
       display: inline-block;
