@@ -53,23 +53,23 @@ async function getCanvasData(parsedGif: GifReader, canvasSize: CanvasSize, name:
         matrix,
         rotation: DefaultRotation,
         opacity: DefaultOpacity,
-        keyframes: {
-            0: {
-                width: 200,
-                height: 200,
-                x: 0,
-            },
-            1000: {
-                width: 500,
-                height: 205,
-                x: 200
-            },
-            2000: {
-                width: 500,
-                height: 500,
-                x: 0
-            }
-        }
+        // keyframes: {
+        //     0: {
+        //         width: 200,
+        //         height: 200,
+        //         x: 0,
+        //     },
+        //     1000: {
+        //         width: 500,
+        //         height: 205,
+        //         x: 200
+        //     },
+        //     2000: {
+        //         width: 500,
+        //         height: 500,
+        //         x: 0
+        //     }
+        // }
     }
 }
 export function parse(file: File, canvasSize: CanvasSize): Promise<RenderItemGif> {

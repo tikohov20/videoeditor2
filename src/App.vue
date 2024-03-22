@@ -119,7 +119,7 @@ function doStuff() {
       </div>
       <div>
         <Upload @upload="handleUpload" v-model="files" :allowed-types="['image/jpeg', 'image/png', 'image/gif']"/>
-        <button @click="doStuff">Click me</button>
+        <button @click="doStuff">Download</button>
       </div>
     </div>
     <pre>

@@ -54,8 +54,8 @@ export async function exportCanvas(
 
     for (let frameNumber = 0; frameNumber < frameNum; frameNumber++) {
         renderTimestamp(canvas, ctx, from + frameNumber * 1000 / fps, renderItems, false, (context, renderItem) => {
-            const matrix = [...renderItem.matrix];
-            context.setTransform(...(matrix.map(item => item * scale) as any))
+            const matrix = renderItem.matrix.scale(scale);
+            context.setTransform(matrix)
         })
         let frame = new VideoFrame(canvas, {
             timestamp: (frameNumber * 1e6) / fps,
