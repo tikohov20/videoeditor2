@@ -4,15 +4,16 @@ import MediaTracks from "./MediaTracks/MediaTracks.vue";
 import Indicator from "./Indicator.vue";
 import { computed, ref } from "vue";
 import { TrackItems } from "../types.ts";
-import { usePlayerElementsStore } from "../store";
+import { useCanvasItemsStore } from "../store/canvasItemsStore.ts";
+import { useTimeStore } from "../store/timeStore.ts";
 let time = ref(0);
 
 interface Props {
   tracks: TrackItems,
 }
 
-const state = usePlayerElementsStore();
-
+const state = useCanvasItemsStore();
+const timeStore = useTimeStore();
 const { tracks } = defineProps<Props>();
 
 const indicatorOffset = computed({
@@ -21,7 +22,7 @@ const indicatorOffset = computed({
   },
   set(value) {
     time.value = value * 1e1;
-    state.updateTimeStamp(time.value);
+    timeStore.updateTimeStamp(time.value);
   }
 });
 </script>
@@ -43,6 +44,7 @@ const indicatorOffset = computed({
   background: #242424;
   position: relative;
   user-select: none;
+  -webkit-user-select: none;
 
   &::-webkit-scrollbar {
     display: none;

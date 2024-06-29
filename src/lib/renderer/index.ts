@@ -18,7 +18,19 @@ export function renderTimestamp(
 
     for (const renderItem of renderItems) {
         const itemFrame = getFrame(timeStamp, renderItem);
-        if (!itemFrame) continue;
+
+        //TODO should we add a property to the item if it's visible or not ?
+        /**
+         * isVisible = true|false
+         * will probably change this later, because I don't want this function to modify the state...
+         */
+        if (!itemFrame) {
+            renderItem.isVisible = false;
+            renderItem.isActive = false;
+            continue;
+        }
+
+        renderItem.isVisible = true;
 
         context.globalAlpha = renderItem.opacity;
         context.setTransform(renderItem.matrix);

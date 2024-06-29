@@ -15,10 +15,14 @@ const canvasItemLayout = computed(
       get() {
         return {
           id: canvasItem.value?.id,
-          x: canvasItem.value?.x,
-          y: canvasItem.value?.y,
-          width: canvasItem.value?.width,
-          height: canvasItem.value?.height,
+          coordinates: {
+            x: canvasItem.value?.x,
+            y: canvasItem.value?.y
+          },
+          dimensions: {
+            width: canvasItem.value?.width,
+            height: canvasItem.value?.height
+          },
           rotation: canvasItem.value?.rotation,
           opacity: canvasItem.value?.opacity
         }
@@ -30,9 +34,22 @@ const canvasItemLayout = computed(
 );
 
 function handleInput(name: string, e: HtmlInputEvent) {
+  const path = name.split('.');
+
+  if (path.length > 1) {
+    canvasItemLayout.value = {
+      ...canvasItemLayout.value,
+      [path[0]]: {
+        ...(canvasItemLayout.value[path[0] as keyof typeof canvasItemLayout.value] as any),
+        [path[1]]: Number(e.target.value)
+      }
+    }
+    return;
+  }
+
   canvasItemLayout.value = {
     ...canvasItemLayout.value,
-    [name]: Number(e.target.value)
+    [path[0]]: Number(e.target.value)
   }
 }
 </script>
@@ -50,8 +67,8 @@ function handleInput(name: string, e: HtmlInputEvent) {
             <input
                 class="input"
                 type="number"
-                :value="canvasItemLayout.x"
-                @input="handleInput('x', $event as HtmlInputEvent)"
+                :value="canvasItemLayout.coordinates.x"
+                @input="handleInput('coordinates.x', $event as HtmlInputEvent)"
             />
           </div>
         </div>
@@ -63,8 +80,8 @@ function handleInput(name: string, e: HtmlInputEvent) {
             <input
                 class="input"
                 type="number"
-                v-model="canvasItemLayout.y"
-                @input="handleInput('y', $event as HtmlInputEvent)"
+                v-model="canvasItemLayout.coordinates.y"
+                @input="handleInput('coordinates.y', $event as HtmlInputEvent)"
             />
           </div>
         </div>
@@ -76,8 +93,8 @@ function handleInput(name: string, e: HtmlInputEvent) {
             <input
                 class="input"
                 type="number"
-                v-model="canvasItemLayout.width"
-                @input="handleInput('width', $event as HtmlInputEvent)"
+                v-model="canvasItemLayout.dimensions.width"
+                @input="handleInput('dimensions.width', $event as HtmlInputEvent)"
 
             />
           </div>
@@ -90,8 +107,8 @@ function handleInput(name: string, e: HtmlInputEvent) {
             <input
                 class="input"
                 type="number"
-                v-model="canvasItemLayout.height"
-                @input="handleInput('height', $event as HtmlInputEvent)"
+                v-model="canvasItemLayout.dimensions.height"
+                @input="handleInput('dimensions.height', $event as HtmlInputEvent)"
             />
           </div>
         </div>

@@ -1,19 +1,23 @@
 <script setup lang="ts">
 
 import LayerPreview from "../Layers/LayerPreview.vue";
-import { usePlayerElementsStore } from "../../store";
 import { storeToRefs } from "pinia";
-const playerStore = usePlayerElementsStore();
-const { activeElement } = storeToRefs(playerStore);
+import { useCanvasUtilsStore } from "../../store/canvasUtilsStore.ts";
+import { useCanvasItemsStore } from "../../store/canvasItemsStore.ts";
+
+const canvasUtilsStore = useCanvasUtilsStore();
+const canvasItemsStore = useCanvasItemsStore();
+
+const { activeItem } = storeToRefs(canvasUtilsStore)
 
 function handleInput(e: any) {
-  playerStore.updateCanvasItemLayout(e.id, e)
+  canvasItemsStore.updateCanvasItemProperties(e.id, e)
 }
 </script>
 
 <template>
   <div class="layer-preview-container">
-    <LayerPreview :canvas-item="activeElement" @input="handleInput" />
+    <LayerPreview :canvas-item="activeItem" @input="handleInput" />
   </div>
 </template>
 

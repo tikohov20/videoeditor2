@@ -51,6 +51,7 @@ export interface RenderItem {
     opacity: number,
     bitMap: CanvasImageSource | Array<CanvasImageSource> | null, //TODO rename to imageSource
     isActive?: boolean,
+    isVisible?: boolean,
     preview: RenderItemPreview,
     keyframes?: {
         [key: number]: {

@@ -2,12 +2,11 @@
 import { computed } from "vue";
 import { storeToRefs } from "pinia";
 
-import { usePlayerElementsStore } from "../../store";
-
 import TimeLine from "../../components/TimeLine.vue";
+import { useCanvasItemsStore } from "../../store/canvasItemsStore.ts";
 
-const playerStore = usePlayerElementsStore();
-const { canvasItems } = storeToRefs(playerStore);
+const canvasItemsStore = useCanvasItemsStore();
+const { canvasItems } = storeToRefs(canvasItemsStore);
 
 const trackItems = computed(() => {
   return canvasItems.value.map(item => item.preview)

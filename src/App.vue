@@ -5,21 +5,28 @@ import { storeToRefs } from "pinia";
 
 import { parse } from "./lib/parsers";
 import { renderTimestamp } from "./lib/renderer";
-import { usePlayerElementsStore } from "./store";
-
+import { useCanvasItemsStore } from "./store/canvasItemsStore.ts";
 import Upload from "./components/Upload/Upload.vue";
-import { CanvasItem } from "./types.ts";
 import LayersContainer from "./views/Containers/LayersContainer.vue";
 import TimeLineContainer from "./views/Containers/TimeLineContainer.vue";
 import { exportCanvas } from "./lib/export";
 import LayerPreviewContainer from "./views/Containers/LayerPreviewContainer.vue";
-import {getTransformationMatrix} from "./lib/shared/helpers.ts";
+import { useCanvasUtilsStore } from "./store/canvasUtilsStore.ts";
+import { useTimeStore } from "./store/timeStore.ts";
+import { useActionHistoryStore } from "./store/actionHistoryStore.ts";
 
-const playerStore = usePlayerElementsStore();
-const { addCanvasItem, clickOnCanvas, moveCanvasItem } = playerStore;
-const { canvasItems, timeStamp } = storeToRefs(playerStore);
+const timeStore = useTimeStore();
+const { timeStamp } = storeToRefs(timeStore);
+const actionHistoryStore = useActionHistoryStore();
+
 const canvasElement = ref<HTMLCanvasElement | null>(null);
 const files = ref<IFile[]>([]);
+
+const cursor = ref('initial');
+
+const canvasItemsStore = useCanvasItemsStore();
+const canvasUtilsStore = useCanvasUtilsStore();
+const { canvasItems } = storeToRefs(canvasItemsStore);
 
 watch(timeStamp, () => {
   render()
@@ -33,47 +40,44 @@ watch(canvasItems, () => {
 
 async function handleUpload(file: File) {
   const canvasItem = await parse(file, { width: 1024, height: 576 });
-  addCanvasItem(canvasItem);
+  // addCanvasItem(canvasItem);
+  canvasItemsStore.addCanvasItem(canvasItem);
+  actionHistoryStore.saveCanvasItemAction(canvasItem, null);
 }
 function render() {
   const ctx = canvasElement.value?.getContext("2d");
   if(!ctx || !canvasElement.value) return;
 
-  renderTimestamp(canvasElement.value, ctx, timeStamp.value, canvasItems.value);
+  renderTimestamp(canvasElement.value, ctx, timeStamp.value, canvasItemsStore.canvasItems);
 }
 
-const initialX = ref(0);
-const initialY = ref(0);
-const initialMouseX = ref(0);
-const initialMouseY = ref(0);
-const movingItem = ref<CanvasItem | null>(null);
+let historyId = 0;
 
 function handleMouseDown(event: MouseEvent) {
   const { offsetX, offsetY } = event;
-  initialMouseX.value = offsetX;
-  initialMouseY.value = offsetY;
-  const result = clickOnCanvas(offsetX, offsetY);
+  const { clickedItem, actionType, cursor: cursorValue } = canvasUtilsStore.clickOnCanvas(offsetX, offsetY);
 
-  if (result && result.value) {
-    movingItem.value = result.value;
-    initialX.value = movingItem.value.x;
-    initialY.value = movingItem.value.y;
-  }
+  if (!clickedItem.value) return;
+
+  cursor.value = cursorValue;
+
+  canvasUtilsStore.initCanvasItemMouseMoveAction(
+      clickedItem.value,
+      clickedItem.value.x,
+      clickedItem.value.y,
+      offsetX,
+      offsetY,
+      actionType
+  );
+
+  actionHistoryStore.saveCanvasItemAction(clickedItem.value);
+
   render();
 }
-const { a, b, c, d, e, f } = getTransformationMatrix({x: 0, y: 0, rotation: 45, scaleX: 1, scaleY: 1});
-const matrix = [
-    a, b, c, d
-];
-const vector = [15, 15];
-const newCords = [vector[0] * matrix[0] + vector[1] * matrix[1] + e, vector[0] * matrix[2] + vector[1] * matrix[3] + f];
 
 function handleMouseUp(_event: MouseEvent) {
-  movingItem.value = null;
-  initialMouseX.value = 0;
-  initialMouseY.value = 0;
-  initialX.value = 0;
-  initialY.value = 0;
+  cursor.value = 'initial';
+  canvasUtilsStore.resetCanvasItemMouseMoveAction();
 }
 
 function handleMouseEnter(_event: MouseEvent) {
@@ -81,20 +85,17 @@ function handleMouseEnter(_event: MouseEvent) {
 }
 
 function handleMouseMove(event: MouseEvent) {
-  if (movingItem.value) {
-    const { offsetX, offsetY } = event;
-    // console.log(initialY.value + offsetY);
-    moveCanvasItem(movingItem.value.id, initialX.value + offsetX - initialMouseX.value, initialY.value + offsetY - initialMouseY.value)
-  }}
+  canvasUtilsStore.canvasItemMouseMoveAction(event);
+}
 
 function doStuff() {
   // canvasItems.value = canvasItems.value.reverse()
-  exportCanvas(canvasElement.value as HTMLCanvasElement, canvasItems.value, 0, 30000, 30, 3500_000, 1920, 1080);
+  exportCanvas(canvasElement.value as HTMLCanvasElement, canvasItems.value, 0, 30000, 30, 3500_000, 1024, 576);
 }
 </script>
 
 <template>
-  <div>
+  <div :style="{cursor}">
     <div class="main-content">
       <div class="top-container">
         <div class="random">
@@ -120,6 +121,7 @@ function doStuff() {
       <div>
         <Upload @upload="handleUpload" v-model="files" :allowed-types="['image/jpeg', 'image/png', 'image/gif']"/>
         <button @click="doStuff">Download</button>
+        <button @click="actionHistoryStore.moveBack">Back</button>
       </div>
     </div>
     <pre>

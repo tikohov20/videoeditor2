@@ -1,5 +1,6 @@
 import { Frame, GifReader } from "omggif";
-import {inv, transpose} from 'mathjs';
+import { inv, transpose } from 'mathjs';
+import { RenderItem } from "./types.ts";
 export async function createImageBitMapFromHtmlImg(img :HTMLImageElement): Promise<ImageBitmap> {
     const canvas = new OffscreenCanvas(img.width, img.height);
     const ctx = canvas.getContext("2d", {
@@ -59,9 +60,13 @@ export function getTransformationMatrix(point: { x: number, y: number, rotation:
 }
 
 export function getIndexMatrix() {
-    return getTransformationMatrix({x: 0, y: 0, scaleX: 1, scaleY: 1, rotation: {angle: 0, x: 0, y: 0}});
+    return getTransformationMatrix({ x: 0, y: 0, scaleX: 1, scaleY: 1, rotation: { angle: 0, x: 0, y: 0 }});
 }
 
 export function invertMatrix(matrix: number[][]) {
     return transpose(inv(matrix));
+}
+
+export function isRenderItemVisible(renderItem: RenderItem, timeStamp: number): boolean {
+    return renderItem.start <= timeStamp && timeStamp < renderItem.start + renderItem.duration
 }

@@ -9,15 +9,16 @@ interface Props {
 import { computed, Ref, ref } from "vue";
 import { ResizeDirection } from "./MediaTracksTypes.ts";
 import Draggable from "../Draggable.vue";
-import { usePlayerElementsStore } from "../../store";
+import { useCanvasUtilsStore } from "../../store/canvasUtilsStore.ts";
 
 const { track, canvasItem } = defineProps<Props>();
 
+// TODO should access the store whatsoever
 const offset = ref(0);
 const left = ref(canvasItem.start / 160); // TODO do we need canvasItem.start and preview.start ?
 const width = ref(canvasItem.duration / 160);
 const resizing = ref(false) as Ref <ResizeDirection|boolean>
-const { moveTrackItem, resizeTrackItem } = usePlayerElementsStore();
+const { moveTrackItem, resizeTrackItem } = useCanvasUtilsStore();
 
 const mediaTrackItemStyles = computed(() => {
   return {

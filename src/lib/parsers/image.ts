@@ -7,7 +7,7 @@ import {
     InitialX, InitialY, RenderItemImage, RenderItemPreview, RenderItemTypes
 } from "../shared/types.ts";
 
-import {createImageBitMapFromHtmlImg, getIndexMatrix} from "../shared/helpers.ts";
+import { createImageBitMapFromHtmlImg, getIndexMatrix } from "../shared/helpers.ts";
 
 async function getCanvasData(img: HTMLImageElement, canvasSize: CanvasSize, name: string): Promise<RenderItemImage> {
     const id = Math.random();
@@ -31,7 +31,7 @@ async function getCanvasData(img: HTMLImageElement, canvasSize: CanvasSize, name
         initialHeight: img.height,
         width: Math.round(img.width * matrix.a),
         height: Math.round(img.height * matrix.d),
-        x: InitialX, // TODO this is bad idea ( I remembered )
+        x: InitialX, // TODO this is bad idea ( I remembered ) WHY IS THIS A BAD IDEA, TELL ME NAXUY
         y: InitialY,
         bitMap: await createImageBitMapFromHtmlImg(img),
         preview: getPreviewData(img, id),
@@ -65,9 +65,6 @@ export function parse(file: File, canvasSize: CanvasSize): Promise<RenderItemIma
     });
 }
 
-export function getFrame(timeStamp: number, renderItem: RenderItemImage): CanvasImageSource | null {
-    if (renderItem.start <= timeStamp && timeStamp <= renderItem.start + renderItem.duration) {
-        return renderItem.bitMap;
-    }
-    return null;
+export function getFrame(renderItem: RenderItemImage): CanvasImageSource {
+    return renderItem.bitMap;
 }

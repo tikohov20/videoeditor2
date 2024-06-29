@@ -1,5 +1,5 @@
 import { GifReader } from "omggif";
-import {createGifBitMapArrayFromGifReader, getIndexMatrix } from "../shared/helpers.ts";
+import { createGifBitMapArrayFromGifReader, getIndexMatrix } from "../shared/helpers.ts";
 import {
     CanvasSize, DefaultOpacity, DefaultRotation,
     DefaultStart,
@@ -90,9 +90,6 @@ export function parse(file: File, canvasSize: CanvasSize): Promise<RenderItemGif
 
 export function getFrame(timeStamp: number, renderItem: RenderItemGif) {
     if(!Array.isArray(renderItem.bitMap)) return null;
-
-    if (timeStamp < renderItem.start) return null;
-    if (renderItem.start + renderItem.duration < timeStamp) return null;
 
     // How far along are we in a gif
     const relativeTimeStamp = timeStamp - renderItem.start;

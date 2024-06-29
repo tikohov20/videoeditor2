@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { CanvasItem } from "../../types.ts";
-import { usePlayerElementsStore } from "../../store";
+import { useCanvasItemsStore } from "../../store/canvasItemsStore.ts";
 
 interface Props {
   layer: CanvasItem
 }
 
-const { removeCanvasItem } = usePlayerElementsStore();
+const { removeCanvasItem } = useCanvasItemsStore();
 
 const { layer } = defineProps<Props>();
 </script>

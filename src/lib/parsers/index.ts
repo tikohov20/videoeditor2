@@ -8,6 +8,7 @@ import {
     RenderItemImage,
     RenderItemTypes
 } from "../shared/types.ts";
+import { isRenderItemVisible } from "../shared/helpers.ts";
 
 export async function parse(file: File, canvasSize: CanvasSize): Promise<RenderItem> {
     const type = file.type;
@@ -25,9 +26,11 @@ export async function parse(file: File, canvasSize: CanvasSize): Promise<RenderI
 export function getFrame(timeStamp: number, renderItem: RenderItem) {
     const { itemType } = renderItem;
 
+    if (!isRenderItemVisible(renderItem, timeStamp)) return null;
+
     switch(itemType) {
         case RenderItemTypes.IMAGE:
-            return getImageFrame(timeStamp, renderItem as RenderItemImage)
+            return getImageFrame(renderItem as RenderItemImage)
         case RenderItemTypes.GIF:
             return getGifFrame(timeStamp, renderItem as RenderItemGif);
         default:
