@@ -3,6 +3,10 @@ import { createPinia } from 'pinia'
 import './style.css'
 import App from './App.vue'
 
-const piana = createPinia();
+const pinia = createPinia();
 
-createApp(App).use(piana).mount('#app')
+import state from "../test/states/state-2.json";
+
+pinia.state.value = state;
+
+createApp(App).use(pinia).mount('#app')

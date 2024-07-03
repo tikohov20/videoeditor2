@@ -6,23 +6,23 @@ import { computed, ref } from "vue";
 import { TrackItems } from "../types.ts";
 import { useCanvasItemsStore } from "../store/canvasItemsStore.ts";
 import { useTimeStore } from "../store/timeStore.ts";
-let time = ref(0);
+import { useCanvasUtilsStore } from "../store/canvas/canvasUtilsStore.ts";
 
 interface Props {
   tracks: TrackItems,
 }
 
 const state = useCanvasItemsStore();
+const canvasUtilsStore = useCanvasUtilsStore();
 const timeStore = useTimeStore();
 const { tracks } = defineProps<Props>();
 
 const indicatorOffset = computed({
   get() {
-    return time.value * 1e-1;
+    return timeStore.timeStamp * 1e-1;
   },
   set(value) {
-    time.value = value * 1e1;
-    timeStore.updateTimeStamp(time.value);
+    timeStore.incrementTimeStamp(value * 1e1);
   }
 });
 </script>
@@ -31,7 +31,12 @@ const indicatorOffset = computed({
   <div class="timeline">
     <Ruler />
     <Indicator v-model="indicatorOffset" />
-    <MediaTracks :canvasItems="state.canvasItems" :tracks="tracks" />
+    <MediaTracks
+        :canvasItems="state.canvasItems"
+        :tracks="tracks"
+        @resizeTrackItem="(id, left, width) => canvasUtilsStore.resizeTrackItem(id, left, width)"
+        @moveTrackItem="(id, offsetX) => canvasUtilsStore.moveTrackItem(id, offsetX)"
+    />
   </div>
 </template>
 

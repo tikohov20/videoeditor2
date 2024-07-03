@@ -6,10 +6,11 @@ interface Props {
   canvasItem: CanvasItem
 }
 
+const emit = defineEmits(['moveTrackItem', 'resizeTrackItem']);
+
 import { computed, Ref, ref } from "vue";
 import { ResizeDirection } from "./MediaTracksTypes.ts";
 import Draggable from "../Draggable.vue";
-import { useCanvasUtilsStore } from "../../store/canvasUtilsStore.ts";
 
 const { track, canvasItem } = defineProps<Props>();
 
@@ -18,7 +19,6 @@ const offset = ref(0);
 const left = ref(canvasItem.start / 160); // TODO do we need canvasItem.start and preview.start ?
 const width = ref(canvasItem.duration / 160);
 const resizing = ref(false) as Ref <ResizeDirection|boolean>
-const { moveTrackItem, resizeTrackItem } = useCanvasUtilsStore();
 
 const mediaTrackItemStyles = computed(() => {
   return {
@@ -38,12 +38,12 @@ const skalatoneStyles = computed(() => {
 
 function handleDrag(e: number) {
   const offsetX = left.value + e / 16 < 0 ? 0 : left.value + e / 16;
-  moveTrackItem(track.renderItemId, offsetX); // TODO emit event and capture on top
+  emit('moveTrackItem', track.renderItemId, offsetX);
+  // moveTrackItem(track.renderItemId, offsetX); // TODO emit event and capture on top
   // we should have some separation of concerns regarding store usage e.g only some type of components can access the store.
 }
 
 function resize(e: number) {
-  //TODO
   let _left = 0;
   let _width = 0;
 
@@ -56,7 +56,9 @@ function resize(e: number) {
       _width = width.value + e / 16;
       _left = left.value;
   }
-  resizeTrackItem(track.renderItemId, _left, _width); // TODO move one layer or 2 layers up
+
+  emit('resizeTrackItem', track.renderItemId, _left, _width);
+  // resizeTrackItem(track.renderItemId, _left, _width); // TODO move one layer or 2 layers up
 }
 </script>
 

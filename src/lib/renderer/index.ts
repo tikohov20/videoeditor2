@@ -24,6 +24,8 @@ export function renderTimestamp(
          * isVisible = true|false
          * will probably change this later, because I don't want this function to modify the state...
          */
+
+        // TODO what does this do ??? describe first then remove ( optionally )
         if (!itemFrame) {
             renderItem.isVisible = false;
             renderItem.isActive = false;

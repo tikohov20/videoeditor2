@@ -8,12 +8,20 @@ interface Props {
 }
 
 const { canvasItems } = defineProps<Props>();
+const emit            = defineEmits(['moveTrackItem', 'resizeTrackItem']);
 
 </script>
 
 <template>
   <div class="media-tracks">
-    <MediaTrack v-for="canvasItem in canvasItems" :key="canvasItem.preview.id" :track="canvasItem.preview" :canvasItem="canvasItem"/>
+    <MediaTrack
+        v-for="canvasItem in canvasItems"
+        :key="canvasItem.preview.id"
+        :track="canvasItem.preview"
+        :canvasItem="canvasItem"
+        @moveTrackItem="(id, offsetX) => emit('moveTrackItem', id, offsetX)"
+        @resizeTrackItem="(id, left, width) => emit('resizeTrackItem', id, left, width)"
+    />
   </div>
 </template>
 

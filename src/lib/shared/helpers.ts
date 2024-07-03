@@ -1,6 +1,7 @@
 import { Frame, GifReader } from "omggif";
 import { inv, transpose } from 'mathjs';
 import { RenderItem } from "./types.ts";
+
 export async function createImageBitMapFromHtmlImg(img :HTMLImageElement): Promise<ImageBitmap> {
     const canvas = new OffscreenCanvas(img.width, img.height);
     const ctx = canvas.getContext("2d", {
@@ -41,7 +42,7 @@ export function getFrameInfoArray(gifInfo: GifReader): Array<Frame> {
         return gifInfo.frameInfo(k);
    })
 }
-const canvas = new OffscreenCanvas(1, 1);
+const canvas = window.OffscreenCanvas ? new OffscreenCanvas(1, 1) : (document.createElement('canvas') as OffscreenCanvas);
 const ctx = canvas.getContext("2d", {
     desynchronized: true,
     willReadFrequently: true

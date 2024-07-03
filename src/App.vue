@@ -11,7 +11,7 @@ import LayersContainer from "./views/Containers/LayersContainer.vue";
 import TimeLineContainer from "./views/Containers/TimeLineContainer.vue";
 import { exportCanvas } from "./lib/export";
 import LayerPreviewContainer from "./views/Containers/LayerPreviewContainer.vue";
-import { useCanvasUtilsStore } from "./store/canvasUtilsStore.ts";
+import { useCanvasUtilsStore } from "./store/canvas/canvasUtilsStore.ts";
 import { useTimeStore } from "./store/timeStore.ts";
 import { useActionHistoryStore } from "./store/actionHistoryStore.ts";
 
@@ -92,6 +92,21 @@ function doStuff() {
   // canvasItems.value = canvasItems.value.reverse()
   exportCanvas(canvasElement.value as HTMLCanvasElement, canvasItems.value, 0, 30000, 30, 3500_000, 1024, 576);
 }
+
+function handleKeyDown(e: KeyboardEvent) {
+  console.log(e);
+}
+
+let isPreviousMetaOrCtrl = false;
+window.addEventListener('keydown', function(ev: KeyboardEvent) {
+  isPreviousMetaOrCtrl = ev.metaKey || ev.ctrlKey;
+
+  if(isPreviousMetaOrCtrl && ev.code === "KeyZ") {
+    ev.stopImmediatePropagation();
+    actionHistoryStore.moveBack();
+  }
+});
+
 </script>
 
 <template>

@@ -1,10 +1,12 @@
 import { defineStore, storeToRefs } from "pinia";
-import { useCanvasItemsStore } from "./canvasItemsStore.ts";
+import { useCanvasItemsStore } from "../canvasItemsStore.ts";
 import { Ref, ref } from "vue";
-import { CanvasItem, CanvasItemAction } from "../types.ts";
-import { invertMatrix } from "../lib/shared/helpers.ts";
-import { RemToMilliSeconds } from "../lib/shared/types.ts";
+import { CanvasItem, CanvasItemAction } from "../../types.ts";
+import { invertMatrix } from "../../lib/shared/helpers.ts";
+import { RemToMilliSeconds } from "../../lib/shared/types.ts";
+import { stickCanvasItemToImportantPositions } from "./utils";
 
+//TODO don't like the name...
 export const useCanvasUtilsStore = defineStore('canvasUtilsStore', () => {
     const canvasItemsStore = useCanvasItemsStore();
     const { canvasItems} = storeToRefs(canvasItemsStore);
@@ -184,7 +186,11 @@ export const useCanvasUtilsStore = defineStore('canvasUtilsStore', () => {
             return;
         }
 
-        canvasItemsStore.moveCanvasItem(canvasItem.id, initialX + offsetX - initialMouseX, initialY + offsetY - initialMouseY)
+        let x = initialX + offsetX - initialMouseX;
+        let y = initialY + offsetY - initialMouseY;
+
+        [x, y] = stickCanvasItemToImportantPositions(x, y, canvasItem);
+        canvasItemsStore.moveCanvasItem(canvasItem.id, x, y)
     }
 
     function resetCanvasItemMouseMoveAction() {

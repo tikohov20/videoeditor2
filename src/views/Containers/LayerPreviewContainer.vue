@@ -2,7 +2,7 @@
 
 import LayerPreview from "../Layers/LayerPreview.vue";
 import { storeToRefs } from "pinia";
-import { useCanvasUtilsStore } from "../../store/canvasUtilsStore.ts";
+import { useCanvasUtilsStore } from "../../store/canvas/canvasUtilsStore.ts";
 import { useCanvasItemsStore } from "../../store/canvasItemsStore.ts";
 
 const canvasUtilsStore = useCanvasUtilsStore();
