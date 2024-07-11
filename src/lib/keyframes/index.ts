@@ -1,11 +1,15 @@
+import { number } from "mathjs";
+
 interface Keyframes {
     [key: number]: {
         width?: number,
-        height?: number
+        height?: number,
+        x?: number,
+        y?: number,
     }
 }
 
-const fields = ['width', 'height', 'x'];
+const fields = ['width', 'height', 'x', 'y'];
 
 function animationFunction(delta: number, value: number) {
     return delta * value;
@@ -18,15 +22,18 @@ export function handleKeyframes(timestamp: number, keyframes: Keyframes) {
 
     const firstGreaterIndex = keyFrameTimestamps.findIndex(number => number > timestamp);
 
-    //validation here
+    // validation here
     if(!firstGreaterIndex) return;
 
     const t1 = keyFrameTimestamps[firstGreaterIndex - 1];
     const t2 =  keyFrameTimestamps[firstGreaterIndex];
     const lower = keyframes[t1];
-    const upper = keyframes[t2];
+    let upper = keyframes[t2];
 
-    if(!upper || !lower) return;
+    if(!upper || !lower) {
+        return keyframes[Math.max(...Object.keys(keyframes).map(key => number(key)))];
+    }
+
     const delta = timestamp - keyFrameTimestamps[firstGreaterIndex - 1];
 
     return fields.reduce<{ [key: string]: number }>((previousValue, currentValue) => {
@@ -36,3 +43,12 @@ export function handleKeyframes(timestamp: number, keyframes: Keyframes) {
         return previousValue;
     }, {});
 }
+
+
+
+
+async function testing() {
+
+}
+
+testing();

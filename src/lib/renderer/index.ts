@@ -2,6 +2,8 @@ import {DefaultOpacity, RenderItem, RenderItems} from "../shared/types.ts";
 import { getFrame } from "../parsers";
 import { drawItemEditBox } from "./utils.ts";
 import {handleKeyframes} from "../keyframes";
+import { getTransformationMatrix } from "../shared/helpers.ts";
+import { number } from "mathjs";
 
 export function renderTimestamp(
     canvas: HTMLCanvasElement | OffscreenCanvas,
@@ -17,8 +19,9 @@ export function renderTimestamp(
     context.clearRect(0, 0, width, height);
 
     for (const renderItem of renderItems) {
+        if (renderItem.isHidden) continue;
         const itemFrame = getFrame(timeStamp, renderItem);
-
+        if(!(itemFrame instanceof ImageBitmap)) continue;
         //TODO should we add a property to the item if it's visible or not ?
         /**
          * isVisible = true|false
@@ -35,32 +38,40 @@ export function renderTimestamp(
         renderItem.isVisible = true;
 
         context.globalAlpha = renderItem.opacity;
-        context.setTransform(renderItem.matrix);
 
         if (contextModifier) contextModifier(context, renderItem);
 
-        // x: 0, y: 0 is top left corner, real x and y are controlled through the transformation matrix
+        let keyFrameMatrix = null;
+        let keyFrameresult: any = {};
         if (renderItem.keyframes) {
-            const result = handleKeyframes(timeStamp, renderItem.keyframes);
-            if (result) {
-                renderItem.matrix.scaleSelf(1 / renderItem.scaleX, 1 / renderItem.scaleY);
-                renderItem.matrix.scaleSelf(result.width / renderItem.initialWidth, result.height / renderItem.initialHeight);
-                renderItem.scaleX = result.width / renderItem.initialWidth;
-                renderItem.scaleY = result.height / renderItem.initialHeight;
-                renderItem.matrix.translateSelf(-renderItem.x, 0);
-                renderItem.matrix.translateSelf(result.x, 0);
-                console.log(renderItem.x);
-                console.log(result.x);
-                renderItem.x = result.x;
+            keyFrameresult = handleKeyframes(timeStamp, renderItem.keyframes);
+            if (keyFrameresult) {
+                // renderItem.x = number(result.x);
+                // renderItem.y = number(result.y);
+                // renderItem.width = number(result.width);
+                // renderItem.height = number(result.height);
+                keyFrameMatrix = getTransformationMatrix({
+                    x: number(keyFrameresult.x),
+                    y: number(keyFrameresult.y),
+                    rotation: {
+                        angle: renderItem.rotation,
+                        x: renderItem.width / 2,
+                        y: renderItem.height / 2
+                    },
+                    scaleX: number(keyFrameresult.width) / renderItem.initialWidth,
+                    scaleY: number(keyFrameresult.height) / renderItem.initialHeight
+                });
             }
         }
+        context.setTransform(keyFrameMatrix || renderItem.matrix);
 
+        // x: 0, y: 0 is top left corner, real x and y are controlled through the transformation matrix
         context.drawImage(itemFrame, 0, 0);
         context.globalAlpha = DefaultOpacity;
         context.resetTransform();
 
         if (drawTools && renderItem.isActive) {
-            drawItemEditBox(context, renderItem)
+            drawItemEditBox(context, {...renderItem, ...keyFrameresult})
         }
         context.resetTransform();
     }

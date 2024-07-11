@@ -1,101 +1,45 @@
 <script setup lang="ts">
 import './lib/keyframes/index.ts';
-import { ref, watch } from "vue";
+import { onMounted, ref } from "vue";
 import { storeToRefs } from "pinia";
 
 import { parse } from "./lib/parsers";
-import { renderTimestamp } from "./lib/renderer";
 import { useCanvasItemsStore } from "./store/canvasItemsStore.ts";
+import { exportCanvas } from "./lib/export";
+import { useActionHistoryStore } from "./store/actionHistoryStore.ts";
+import { useCanvasContextStore } from "./store/canvas/canvasContextStore.ts";
+import { ParsedFile, useFilesStore } from "./store/filesStore.ts";
+
 import Upload from "./components/Upload/Upload.vue";
 import LayersContainer from "./views/Containers/LayersContainer.vue";
 import TimeLineContainer from "./views/Containers/TimeLineContainer.vue";
-import { exportCanvas } from "./lib/export";
 import LayerPreviewContainer from "./views/Containers/LayerPreviewContainer.vue";
-import { useCanvasUtilsStore } from "./store/canvas/canvasUtilsStore.ts";
-import { useTimeStore } from "./store/timeStore.ts";
-import { useActionHistoryStore } from "./store/actionHistoryStore.ts";
+import Canvas from "./views/Canvas/Canvas.vue";
+import Files from "./views/Files/Files.vue";
 
-const timeStore = useTimeStore();
-const { timeStamp } = storeToRefs(timeStore);
 const actionHistoryStore = useActionHistoryStore();
-
-const canvasElement = ref<HTMLCanvasElement | null>(null);
-const files = ref<IFile[]>([]);
-
-const cursor = ref('initial');
-
+const canvasContextStore = useCanvasContextStore();
 const canvasItemsStore = useCanvasItemsStore();
-const canvasUtilsStore = useCanvasUtilsStore();
+const filesStore = useFilesStore();
+
 const { canvasItems } = storeToRefs(canvasItemsStore);
 
-watch(timeStamp, () => {
-  render()
-});
+const canvasComponent = ref<InstanceType<typeof Canvas>>();
+const files = ref<IFile[]>([]);
+const cursor = ref('initial');
 
-watch(canvasItems, () => {
-  render()
-}, {
-  deep: true
+onMounted(() => {
+  canvasContextStore.initRenderWatchers();
 })
 
 async function handleUpload(file: File) {
-  const canvasItem = await parse(file, { width: 1024, height: 576 });
-  // addCanvasItem(canvasItem);
-  canvasItemsStore.addCanvasItem(canvasItem);
-  actionHistoryStore.saveCanvasItemAction(canvasItem, null);
-}
-function render() {
-  const ctx = canvasElement.value?.getContext("2d");
-  if(!ctx || !canvasElement.value) return;
-
-  renderTimestamp(canvasElement.value, ctx, timeStamp.value, canvasItemsStore.canvasItems);
+  await filesStore.parseFile(file);
 }
 
-let historyId = 0;
-
-function handleMouseDown(event: MouseEvent) {
-  const { offsetX, offsetY } = event;
-  const { clickedItem, actionType, cursor: cursorValue } = canvasUtilsStore.clickOnCanvas(offsetX, offsetY);
-
-  if (!clickedItem.value) return;
-
-  cursor.value = cursorValue;
-
-  canvasUtilsStore.initCanvasItemMouseMoveAction(
-      clickedItem.value,
-      clickedItem.value.x,
-      clickedItem.value.y,
-      offsetX,
-      offsetY,
-      actionType
-  );
-
-  actionHistoryStore.saveCanvasItemAction(clickedItem.value);
-
-  render();
+function exportCanvasMP4() {
+  exportCanvas(canvasContextStore.canvas as HTMLCanvasElement, canvasItems.value, 0, 3000, 30, 3500_000, 1024, 576);
 }
 
-function handleMouseUp(_event: MouseEvent) {
-  cursor.value = 'initial';
-  canvasUtilsStore.resetCanvasItemMouseMoveAction();
-}
-
-function handleMouseEnter(_event: MouseEvent) {
-  // console.log(event)
-}
-
-function handleMouseMove(event: MouseEvent) {
-  canvasUtilsStore.canvasItemMouseMoveAction(event);
-}
-
-function doStuff() {
-  // canvasItems.value = canvasItems.value.reverse()
-  exportCanvas(canvasElement.value as HTMLCanvasElement, canvasItems.value, 0, 30000, 30, 3500_000, 1024, 576);
-}
-
-function handleKeyDown(e: KeyboardEvent) {
-  console.log(e);
-}
 
 let isPreviousMetaOrCtrl = false;
 window.addEventListener('keydown', function(ev: KeyboardEvent) {
@@ -107,25 +51,25 @@ window.addEventListener('keydown', function(ev: KeyboardEvent) {
   }
 });
 
+
+async function handleAddFileToCanvas(file: ParsedFile) {
+  const _file = new File([file.arrayBuffer], file.name, { type: file.fileType })
+  const canvasItem = await parse(_file, { width: 1024, height: 576 });
+  canvasItemsStore.addCanvasItem(canvasItem);
+  actionHistoryStore.saveCanvasItemAction(canvasItem);
+}
+
 </script>
 
 <template>
   <div :style="{cursor}">
     <div class="main-content">
       <div class="top-container">
-        <div class="random">
-          random
+        <div class="left-container">
+          <Files @add-file-to-canvas="handleAddFileToCanvas" />
         </div>
         <div class="player-container">
-          <canvas
-              @mousedown="handleMouseDown"
-              @mouseup="handleMouseUp"
-              @mouseenter="handleMouseEnter"
-              @mousemove="handleMouseMove"
-              ref="canvasElement"
-              width="1024"
-              height="576"
-          />
+          <Canvas v-model:cursor="cursor" ref="canvasComponent" />
         </div>
         <LayerPreviewContainer />
       </div>
@@ -135,13 +79,10 @@ window.addEventListener('keydown', function(ev: KeyboardEvent) {
       </div>
       <div>
         <Upload @upload="handleUpload" v-model="files" :allowed-types="['image/jpeg', 'image/png', 'image/gif']"/>
-        <button @click="doStuff">Download</button>
+        <button @click="exportCanvasMP4">Download</button>
         <button @click="actionHistoryStore.moveBack">Back</button>
       </div>
     </div>
-    <pre>
-      {{ JSON.stringify(canvasItems, null, 2) }}
-    </pre>
   </div>
 </template>
 
@@ -171,5 +112,8 @@ window.addEventListener('keydown', function(ev: KeyboardEvent) {
 .bottom-container {
   display: grid;
   grid-template-columns: 25rem auto;
+}
+.left-container {
+  width: 400px;
 }
 </style>

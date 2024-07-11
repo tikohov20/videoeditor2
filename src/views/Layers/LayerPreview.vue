@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, toRefs } from "vue";
 import {CanvasItem} from "../../types.ts";
+import Keyframes from "./Keyframes/Keyframes.vue";
+import { useTimeStore } from "../../store/timeStore.ts";
 
 interface Props {
   canvasItem: CanvasItem | null
@@ -9,7 +11,7 @@ interface Props {
 const props = defineProps<Props>();
 const emits = defineEmits(['input']);
 const { canvasItem } = toRefs(props);
-
+const timeStore = useTimeStore();
 const canvasItemLayout = computed(
     {
       get() {
@@ -50,6 +52,22 @@ function handleInput(name: string, e: HtmlInputEvent) {
   canvasItemLayout.value = {
     ...canvasItemLayout.value,
     [path[0]]: Number(e.target.value)
+  }
+}
+
+function handleAddKeyframe(canvasItem: CanvasItem | null) {
+  if (!canvasItem) return;
+
+  if (!canvasItem.keyframes) {
+    canvasItem.keyframes = {};
+  }
+  if(!canvasItem.keyframes[timeStore.timeStamp]) {
+    canvasItem.keyframes[timeStore.timeStamp] = {
+      x: canvasItem.x,
+      y: canvasItem.y,
+      width: canvasItem.width,
+      height: canvasItem.height
+    };
   }
 }
 </script>
@@ -138,6 +156,18 @@ function handleInput(name: string, e: HtmlInputEvent) {
             />
           </div>
         </div>
+        <div class="form-item keyframes-form-item">
+          <div class="keyframes-hat">
+            <label>
+              Key Frames
+            </label>
+            <a v-if="canvasItem.keyframes" @click="canvasItem.keyframes = null">Delete</a>
+          </div>
+          <div>
+            <Keyframes v-if="canvasItem.keyframes" v-model:key-frames="canvasItem.keyframes" />
+            <button @click="() => handleAddKeyframe(canvasItem)" class="add-keyframe-button">+ Keyframe</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -159,7 +189,7 @@ function handleInput(name: string, e: HtmlInputEvent) {
 
 .form-group {
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: repeat(2, auto);
   row-gap: 1rem;
   column-gap: 1.5rem;
   .form-item {
@@ -168,6 +198,33 @@ function handleInput(name: string, e: HtmlInputEvent) {
       font-size: 0.875rem;
       font-weight: 500;
     }
+
+    &.keyframes-form-item {
+      grid-column-start: 1;
+      grid-column-end: 3;
+    }
+  }
+}
+.keyframes-hat {
+  display: flex;
+  justify-content: space-between;
+
+  label, a {
+    line-height: 2rem;
+    font-size: 0.875rem;
+  }
+
+  a {
+    color: #ff0000;
+  }
+}
+
+.add-keyframe-button {
+  margin-top: 1rem;
+  padding: .5rem;
+
+  &:hover {
+    border-color: #15700e;
   }
 }
 </style>

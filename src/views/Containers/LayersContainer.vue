@@ -7,9 +7,6 @@ import { useCanvasItemsStore } from "../../store/canvasItemsStore.ts";
 const canvasItemsStore = useCanvasItemsStore();
 const { canvasItems } = storeToRefs(canvasItemsStore);
 
-function handleInput(e: any) {
-  // console.log(e);
-}
 </script>
 
 <template>
@@ -17,7 +14,7 @@ function handleInput(e: any) {
     <div class="layer-hat">
 
     </div>
-    <Layers :layers="canvasItems" @input="handleInput" />
+    <Layers :layers="canvasItems" />
   </div>
 </template>
 

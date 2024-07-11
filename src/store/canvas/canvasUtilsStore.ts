@@ -54,14 +54,15 @@ export const useCanvasUtilsStore = defineStore('canvasUtilsStore', () => {
         return { clickedItem: activeItem, actionType, cursor: getCursorFromActionType(actionType) };
     }
 
-    function findItemAtCoordinates(x: number, y: number) {
+    function findItemAtCoordinates(x: number, y: number, widthKeyframes = true) {
         // last element of array is on the top of the canvas
         let x1, y1 = 0;
         for (let i = canvasItems.value.length - 1; i >= 0; i--) {
             const item: CanvasItem = canvasItems.value[i];
 
             if (!item.isVisible) continue;
-
+            if (item.isHidden) continue;
+            if (!widthKeyframes && item.keyframes) continue;
             //TODO doesn't work lol ( next time explain what doesn't work you dummy... )
             //Change coordinate system
             const { a,b,c,d,e,f } = item.matrix.scale(1/item.scaleX, 1/item.scaleY)
@@ -189,7 +190,8 @@ export const useCanvasUtilsStore = defineStore('canvasUtilsStore', () => {
         let x = initialX + offsetX - initialMouseX;
         let y = initialY + offsetY - initialMouseY;
 
-        [x, y] = stickCanvasItemToImportantPositions(x, y, canvasItem);
+        [x, y] = stickCanvasItemToImportantPositions(x, y, canvasItem, canvasItems.value);
+        if(canvasItem.keyframes) return;
         canvasItemsStore.moveCanvasItem(canvasItem.id, x, y)
     }
 

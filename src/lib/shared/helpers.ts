@@ -1,6 +1,7 @@
 import { Frame, GifReader } from "omggif";
 import { inv, transpose } from 'mathjs';
 import { RenderItem } from "./types.ts";
+import { Canvas } from "canvas";
 
 export async function createImageBitMapFromHtmlImg(img :HTMLImageElement): Promise<ImageBitmap> {
     const canvas = new OffscreenCanvas(img.width, img.height);
@@ -27,14 +28,31 @@ export async function createGifBitMapArrayFromGifReader(gifInfo: GifReader):Prom
 
     return await Promise.all(
         new Array(gifInfo.numFrames()).fill(0).map(async (_, k) => {
+            // @ts-ignore
             const frameInfo = gifInfo.frameInfo(k);
-            const image = new ImageData(frameInfo.width, frameInfo.height);
+            const image = new ImageData(gifInfo.width, gifInfo.height);
+
             gifInfo.decodeAndBlitFrameRGBA(k, image.data);
+
             const initialBitMap = await window.createImageBitmap(image);
-            ctx.drawImage(initialBitMap, 0, 0);
+
+            ctx.drawImage(initialBitMap, 0, 0, gifInfo.width, gifInfo.height);
             return await window.createImageBitmap(ctx.getImageData(0, 0, gifInfo.width, gifInfo.height));
         })
     );
+}
+
+export async function urlFromImageData(imageData: ImageData) {
+    const canvas = new OffscreenCanvas(imageData.width, imageData.height);
+    const ctx = canvas.getContext("2d", {
+        desynchronized: true,
+        willReadFrequently: true
+    });
+    if (!ctx) throw "Error";
+
+    ctx.putImageData(imageData, 0, 0);
+
+    return URL.createObjectURL(await canvas.convertToBlob());
 }
 
 export function getFrameInfoArray(gifInfo: GifReader): Array<Frame> {
@@ -42,7 +60,8 @@ export function getFrameInfoArray(gifInfo: GifReader): Array<Frame> {
         return gifInfo.frameInfo(k);
    })
 }
-const canvas = window.OffscreenCanvas ? new OffscreenCanvas(1, 1) : (document.createElement('canvas') as OffscreenCanvas);
+
+const canvas = window.OffscreenCanvas ? new OffscreenCanvas(1, 1) : (new Canvas(1, 1) as any);
 const ctx = canvas.getContext("2d", {
     desynchronized: true,
     willReadFrequently: true
@@ -70,4 +89,18 @@ export function invertMatrix(matrix: number[][]) {
 
 export function isRenderItemVisible(renderItem: RenderItem, timeStamp: number): boolean {
     return renderItem.start <= timeStamp && timeStamp < renderItem.start + renderItem.duration
+}
+
+export function getArrayBufferFromFile(file: File): Promise<ArrayBuffer> {
+    return new Promise((resolve, reject) => {
+        const fr = new FileReader();
+        fr.readAsArrayBuffer(file);
+        fr.onload = async function() {
+            const arrayBuffer = fr.result as ArrayBufferLike;
+            resolve(arrayBuffer);
+        }
+        fr.onerror = function() {
+            reject("Error parsing file")
+        }
+    });
 }

@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { CanvasItem } from "../types.ts";
 import { getTransformationMatrix } from "../lib/shared/helpers.ts";
 import { parse } from "../lib/parsers";
+import { isNumber } from "mathjs";
 
 export const useCanvasItemsStore = defineStore('canvasItems', {
     state() {
@@ -15,16 +16,15 @@ export const useCanvasItemsStore = defineStore('canvasItems', {
             const mediaItem = await media[`../assets/${item.name}`]() as any;
             const mediaItemUrl = mediaItem.default;
             try {
-                const resopnse = await fetch(mediaItemUrl);
-                const contentType = resopnse.headers.get('content-type')
-                const blob = await resopnse.blob();
+                const response = await fetch(mediaItemUrl);
+                const contentType = response.headers.get('content-type')
+                const blob = await response.blob();
                 const file = new File([blob], item.name, { type: contentType ?? undefined  });
                 const data = await parse(file, {width: 1024, height: 576});
 
                 item.bitMap = data.bitMap;
                 item.preview = data.preview;
-                data.duration = item.duration;
-                data.matrix = getTransformationMatrix({
+                item.matrix = getTransformationMatrix({
                     x: item.x,
                     y: item.y,
                     rotation: {
@@ -35,9 +35,21 @@ export const useCanvasItemsStore = defineStore('canvasItems', {
                     scaleX: item.width / item.initialWidth,
                     scaleY: item.height / item.initialHeight
                 });
-                data.x = item.x;
-                data.y = item.y;
-                return data;
+                // data.duration = item.duration;
+                // data.matrix = getTransformationMatrix({
+                //     x: item.x,
+                //     y: item.y,
+                //     rotation: {
+                //         angle: item.rotation,
+                //         x: item.width / 2,
+                //         y: item.height / 2
+                //     },
+                //     scaleX: item.width / item.initialWidth,
+                //     scaleY: item.height / item.initialHeight
+                // });
+                // data.x = item.x;
+                // data.y = item.y;
+                return item;
             } catch (e) {
                 item.bitMap = null;
                 return item;
@@ -57,6 +69,10 @@ export const useCanvasItemsStore = defineStore('canvasItems', {
         removeCanvasItem(id: number) {
             this.canvasItems = this.canvasItems.filter(item => item.id !== id);
         },
+        hideCanvasItem(id: number) {
+            let localCanvasItem = this.canvasItems.find(item => item.id === id);
+            localCanvasItem && (localCanvasItem.isHidden = !localCanvasItem.isHidden);
+        },
         changeCanvasItemActive(id: number) {
             const canvasItem = this.canvasItem(id);
             if (!canvasItem) return;
@@ -73,7 +89,6 @@ export const useCanvasItemsStore = defineStore('canvasItems', {
                 rotation?: number,
                 opacity?: number
             }) {
-
             let canvasItem = null;
 
             if (properties.coordinates) {
@@ -89,11 +104,11 @@ export const useCanvasItemsStore = defineStore('canvasItems', {
                 canvasItem.height = properties.dimensions.height;
             }
 
-            if (properties.rotation) {
+            if (isNumber(properties.rotation)) {
                 canvasItem.rotation = properties.rotation;
             }
 
-            if (properties.opacity) {
+            if (isNumber(properties.opacity)) {
                 canvasItem.opacity = properties.opacity;
             }
 
@@ -111,7 +126,6 @@ export const useCanvasItemsStore = defineStore('canvasItems', {
 
             canvasItem.scaleX = canvasItem.width / canvasItem.initialWidth;
             canvasItem.scaleY = canvasItem.height / canvasItem.initialHeight;
-
             return canvasItem;
         },
         moveCanvasItem(id: number, x: number, y: number) {

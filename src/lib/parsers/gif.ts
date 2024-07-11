@@ -1,14 +1,18 @@
 import { GifReader } from "omggif";
-import { createGifBitMapArrayFromGifReader, getIndexMatrix } from "../shared/helpers.ts";
 import {
-    CanvasSize, DefaultOpacity, DefaultRotation,
+    createGifBitMapArrayFromGifReader,
+    getArrayBufferFromFile,
+    getIndexMatrix,
+    urlFromImageData
+} from "../shared/helpers.ts";
+import {
+    CanvasSize, DefaultImagePreviewSize, DefaultOpacity, DefaultRotation,
     DefaultStart,
     InitialX,
     InitialY,
-    RenderItemGif,
+    RenderItemGif, RenderItemPreview,
     RenderItemTypes
 } from "../shared/types.ts";
-
 
 async function getCanvasData(parsedGif: GifReader, canvasSize: CanvasSize, name: string): Promise<RenderItemGif> {
     const { width, height } = parsedGif;
@@ -22,6 +26,9 @@ async function getCanvasData(parsedGif: GifReader, canvasSize: CanvasSize, name:
         scale = canvasSize.height / height;
     }
     matrix.scaleSelf(scale);
+
+    const previewImage = new ImageData(parsedGif.width, parsedGif.height);
+    parsedGif.decodeAndBlitFrameRGBA(0, previewImage.data);
 
     return {
         id,
@@ -43,49 +50,29 @@ async function getCanvasData(parsedGif: GifReader, canvasSize: CanvasSize, name:
             frameCount: parsedGif.numFrames(),
             delay: frameInfo.delay * 10
         },
-        preview: {
-            id: Math.random(),
-            src: "https://picsum.photos/200/300",
-            start: 0,
-            size: 1000,
-            renderItemId: id
-        },
+        preview: await getPreviewData(previewImage, id),
         matrix,
         rotation: DefaultRotation,
         opacity: DefaultOpacity,
-        // keyframes: {
-        //     0: {
-        //         width: 200,
-        //         height: 200,
-        //         x: 0,
-        //     },
-        //     1000: {
-        //         width: 500,
-        //         height: 205,
-        //         x: 200
-        //     },
-        //     2000: {
-        //         width: 500,
-        //         height: 500,
-        //         x: 0
-        //     }
-        // }
+        keyframes: null,
     }
 }
-export function parse(file: File, canvasSize: CanvasSize): Promise<RenderItemGif> {
-    return new Promise((resolve, reject) => {
-        const fr = new FileReader();
-        fr.readAsArrayBuffer(file);
-        fr.onload = async function() {
-            const arrayBuffer = new Uint8Array(fr.result as ArrayBufferLike);
-            const parsedGif = new GifReader(arrayBuffer);
-            const parsedData = await getCanvasData(parsedGif, canvasSize, file.name);
-            resolve(parsedData);
-        }
-        fr.onerror = function() {
-            reject("Error parsing gif")
-        }
-    });
+export async function parse(file: File, canvasSize: CanvasSize): Promise<RenderItemGif> {
+    const parsedGif = new GifReader(new Uint8Array(await getArrayBufferFromFile(file)));
+    const parsedData = await getCanvasData(parsedGif, canvasSize, file.name);
+    return parsedData;
+}
+
+async function getPreviewData(previewImage: ImageData, id: number): Promise<RenderItemPreview> {
+
+    const src = await urlFromImageData(previewImage);
+    return {
+        id: Math.random(),
+        src,
+        size: DefaultImagePreviewSize,
+        start: DefaultStart,
+        renderItemId: id
+    }
 }
 
 export function getFrame(timeStamp: number, renderItem: RenderItemGif) {

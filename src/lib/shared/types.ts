@@ -52,14 +52,25 @@ export interface RenderItem {
     bitMap: CanvasImageSource | Array<CanvasImageSource> | null, //TODO rename to imageSource
     isActive?: boolean,
     isVisible?: boolean,
+    isHidden?: boolean
     preview: RenderItemPreview,
-    keyframes?: {
-        [key: number]: {
-            width?: number,
-            height?: number,
-            x?: number
-        }
+    keyframes?: KeyFrames | null,
+}
+
+export interface KeyFrames {
+    [key: number]: {
+        width?: number,
+        height?: number,
+        x?: number,
+        y?: number
     }
+}
+
+interface KeyFrame {
+    width?:  number,
+    height?: number,
+    x?: number,
+    y?: number
 }
 
 export enum RenderItemTypes {

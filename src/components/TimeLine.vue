@@ -2,7 +2,7 @@
 import Ruler from "./Ruler.vue";
 import MediaTracks from "./MediaTracks/MediaTracks.vue";
 import Indicator from "./Indicator.vue";
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import { TrackItems } from "../types.ts";
 import { useCanvasItemsStore } from "../store/canvasItemsStore.ts";
 import { useTimeStore } from "../store/timeStore.ts";

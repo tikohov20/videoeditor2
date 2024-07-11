@@ -6,7 +6,7 @@ interface Props {
   layer: CanvasItem
 }
 
-const { removeCanvasItem } = useCanvasItemsStore();
+const { removeCanvasItem, hideCanvasItem } = useCanvasItemsStore();
 
 const { layer } = defineProps<Props>();
 </script>
@@ -14,7 +14,7 @@ const { layer } = defineProps<Props>();
 
 <template>
   <div class="layer">
-    <div>&lt;0&gt;</div>
+    <div @click="hideCanvasItem(layer.id)">&lt;0&gt;</div>
     <div>{{ layer.name }}</div>
     <div @click="removeCanvasItem(layer.id)">X</div>
   </div>

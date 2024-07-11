@@ -1,5 +1,6 @@
 import {RenderItem} from "../shared/types.ts";
 
+// TODO make configurable
 export function drawItemEditBox(context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, renderItem: RenderItem) {
     //Move to item corner
     context.beginPath();
