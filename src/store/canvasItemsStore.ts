@@ -35,6 +35,8 @@ export const useCanvasItemsStore = defineStore('canvasItems', {
                     scaleX: item.width / item.initialWidth,
                     scaleY: item.height / item.initialHeight
                 });
+
+                item.preview.renderItemId = item.id;
                 // data.duration = item.duration;
                 // data.matrix = getTransformationMatrix({
                 //     x: item.x,

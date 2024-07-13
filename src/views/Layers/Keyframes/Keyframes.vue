@@ -112,7 +112,7 @@ function handleDelete(keyframe: ComputedKeyFrame) {
       }
 
       a {
-        color: #ff0000;
+        color: $danger;
       }
     }
   }

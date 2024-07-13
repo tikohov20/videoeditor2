@@ -18,13 +18,16 @@ const { layers } = defineProps<Props>();
 <style lang="scss" scoped>
 .layers {
   :deep(.layer) {
-    grid-template-columns: 2.5rem auto auto;
-    height: 2.5rem;
-    align-items: center;
-    display: grid;
-
+    //grid-template-columns: 2.5rem auto auto;
+    //height: 2.5rem;
+    //align-items: center;
+    //display: grid;
     &:not(:last-child) {
       border-bottom: 1px solid #1a1a1a;
+    }
+    &:nth-child(1) {
+      flex-grow: 1;
+      width: 100%;
     }
 
     > div {

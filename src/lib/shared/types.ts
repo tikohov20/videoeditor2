@@ -32,7 +32,7 @@ export interface RenderItemPreview {
 }
 
 export interface RenderItem {
-    id: number,
+    id: RenderItemId,
     name: string,
     itemType: RenderItemTypes,
     maxDuration: number,
@@ -57,6 +57,8 @@ export interface RenderItem {
     keyframes?: KeyFrames | null,
 }
 
+export type RenderItemId = number;
+
 export interface KeyFrames {
     [key: number]: {
         width?: number,
@@ -66,12 +68,12 @@ export interface KeyFrames {
     }
 }
 
-interface KeyFrame {
-    width?:  number,
-    height?: number,
-    x?: number,
-    y?: number
-}
+// interface KeyFrame {
+//     width?:  number,
+//     height?: number,
+//     x?: number,
+//     y?: number
+// }
 
 export enum RenderItemTypes {
     IMAGE = "image",

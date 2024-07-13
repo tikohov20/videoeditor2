@@ -1,0 +1,21 @@
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin vertical-center {
+  display: flex;
+  align-content: center;
+}
+
+@mixin icon-container($width: 1rem) {
+  @include flex-center;
+
+  width: $width;
+  height: $width;
+}
+
+@mixin transition($seconds: .2s, $mode: ease) {
+  transition: $seconds $mode;
+}
