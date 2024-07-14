@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import './lib/keyframes/index.ts';
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch, watchEffect } from "vue";
 import { storeToRefs } from "pinia";
 
 import { parse } from "./lib/parsers";
@@ -16,6 +16,7 @@ import TimeLineContainer from "./views/Containers/TimeLineContainer.vue";
 import LayerPreviewContainer from "./views/Containers/LayerPreviewContainer.vue";
 import Canvas from "./views/Canvas/Canvas.vue";
 import Files from "./views/Files/Files.vue";
+import { useMagicKeys, whenever } from "@vueuse/core";
 
 const actionHistoryStore = useActionHistoryStore();
 const canvasContextStore = useCanvasContextStore();
@@ -40,7 +41,6 @@ function exportCanvasMP4() {
   exportCanvas(canvasContextStore.canvas as HTMLCanvasElement, canvasItems.value, 0, 3000, 30, 3500_000, 1024, 576);
 }
 
-
 let isPreviousMetaOrCtrl = false;
 window.addEventListener('keydown', function(ev: KeyboardEvent) {
   isPreviousMetaOrCtrl = ev.metaKey || ev.ctrlKey;
@@ -50,7 +50,6 @@ window.addEventListener('keydown', function(ev: KeyboardEvent) {
     actionHistoryStore.moveBack();
   }
 });
-
 
 async function handleAddFileToCanvas(file: ParsedFile) {
   const _file = new File([file.arrayBuffer], file.name, { type: file.fileType })

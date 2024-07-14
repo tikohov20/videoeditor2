@@ -3,7 +3,8 @@ import { CanvasItem } from "@/types.ts";
 import { useCanvasItemsStore } from "@/store/canvasItemsStore.ts";
 
 import Accordion from "@/components/Accordion/Accordion.vue";
-import LayerAccordion from "@/views/LayerAccordion.vue";
+import LayerAccordion from "@/views/Layers/LayerAccordion.vue";
+import LayerAccordionWrapper from "@/views/Layers/LayerAccordionWrapper.vue";
 
 interface Props {
   layer: CanvasItem
@@ -12,19 +13,17 @@ interface Props {
 const { removeCanvasItem, hideCanvasItem } = useCanvasItemsStore();
 
 const { layer } = defineProps<Props>();
+
 </script>
 
 
 <template>
   <div class="layer">
-    <LayerAccordion :visible="!!layer.isHidden" @update:visible="() => hideCanvasItem(layer.id)" icon-left>
+    <LayerAccordionWrapper @delete-layer="() => removeCanvasItem(layer.id)" :visible="!!layer.isHidden" @update:visible="() => hideCanvasItem(layer.id)" icon-left>
       <span>
         {{ layer.name }}
       </span>
-
-      <template #content>
-      </template>
-    </LayerAccordion>
+    </LayerAccordionWrapper>
   </div>
 </template>
 

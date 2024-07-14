@@ -9,6 +9,12 @@
   align-content: center;
 }
 
+@mixin flex-container($justify: space-between, $align: center) {
+  display: flex;
+  justify-content: $justify;
+  align-items: $align;
+}
+
 @mixin icon-container($width: 1rem) {
   @include flex-center;
 

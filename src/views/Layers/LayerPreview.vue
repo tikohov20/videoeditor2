@@ -224,7 +224,7 @@ function handleAddKeyframe(canvasItem: CanvasItem | null) {
   padding: .5rem;
 
   &:hover {
-    border-color: #15700e;
+    border-color: $blue;
   }
 }
 </style>

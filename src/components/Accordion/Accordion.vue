@@ -53,8 +53,11 @@ defineExpose({
 $headingMargin: 1rem;
 
 .accordion {
+  padding: 0;
+  text-align: left;
   .accordion-heading {
-    display: flex;
+    display: flex;  text-align: left;
+
     align-items: center;
     justify-content: space-between;
 
@@ -63,11 +66,12 @@ $headingMargin: 1rem;
     }
     .accordion-heading-content {
       flex-grow: 1;
-      margin-right: $headingMargin
+      //margin-right: $headingMargin
     }
     .accordion-heading-icon {
       @include transition;
       @include icon-container(1rem);
+      margin-right: .5rem;
       color: $color-primary-dark;
     }
   }
@@ -76,23 +80,28 @@ $headingMargin: 1rem;
       flex-direction: row-reverse;
 
       .accordion-heading-content {
-        margin-right: 0;
-        margin-left: $headingMargin;
+        //margin-right: 0;
+        //margin-left: $headingMargin;
       }
     }
   }
   &.expanded {
-    .accordion-heading-icon {
-      transform: rotate(90deg);
+    > .accordion-heading {
+      .accordion-heading-icon {
+        transform: rotate(90deg);
+      }
     }
 
-    .accordion-content {
-      height: initial;
+    > .accordion-content {
+      max-height: 100vh;
       overflow: initial;
+      margin-left: 1.5rem;
+      //@include transition;
     }
   }
-  .accordion-content {
-    height: 0;
+  > .accordion-content {
+    //@include transition;
+    max-height: 0;
     overflow: hidden;
   }
 }

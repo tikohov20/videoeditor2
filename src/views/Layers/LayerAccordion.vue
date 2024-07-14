@@ -16,6 +16,7 @@ const emit = defineEmits(['update:visible']);
 const accordion = ref<typeof Accordion | null>(null);
 const accordionExpanded = ref(false);
 
+const secondExpanded = ref(false);
 </script>
 
 <template>
@@ -30,13 +31,24 @@ const accordionExpanded = ref(false);
         <FontAwesomeIcon :icon="faAngleRight" />
       </a>
     </template>
+
     <slot />
 
     <template #content>
       <slot name="content">
         <div>
-          <Accordion>
-            hihihihi
+          <Accordion class="inner-accordion" v-model:expanded="secondExpanded">
+            Effects
+
+            <template #content>
+              <slot name="effects" />
+            </template>
+          </Accordion>
+          <Accordion class="inner-accordion" v-model:expanded="secondExpanded">
+            Transform
+            <template #content>
+              <slot name="transform" />
+            </template>
           </Accordion>
         </div>
       </slot>
@@ -44,7 +56,7 @@ const accordionExpanded = ref(false);
   </Accordion>
 </template>
 
-<style lang="scss" scoped>
+<style scoped lang="scss">
 .accordion {
   padding: 0 1rem;
   :deep(.accordion-heading-icon) {
@@ -60,5 +72,9 @@ const accordionExpanded = ref(false);
       }
     }
   }
+}
+
+.inner-accordion {
+  padding: 0;
 }
 </style>
