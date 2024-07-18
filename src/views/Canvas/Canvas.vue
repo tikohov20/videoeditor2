@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref, watch } from "vue";
-import { useCanvasUtilsStore } from "../../store/canvas/canvasUtilsStore.ts";
-import { useActionHistoryStore } from "../../store/actionHistoryStore.ts";
-import { useCanvasContextStore } from "../../store/canvas/canvasContextStore.ts";
+import { onMounted, reactive, ref, toRefs, watch } from "vue";
+import { useCanvasUtilsStore } from "@/store/canvas/canvasUtilsStore.ts";
+import { useActionHistoryStore } from "@/store/actionHistoryStore.ts";
+import { useCanvasContextStore } from "@/store/canvas/canvasContextStore.ts";
+import { useLayoutStore } from "@/store/layout/layoutStore.ts";
 
 const canvasUtilsStore = useCanvasUtilsStore();
 const actionHistoryStore = useActionHistoryStore();
@@ -11,10 +12,13 @@ const canvasContextStore = useCanvasContextStore();
 const emit = defineEmits(['render', 'update:cursor']);
 const cursor = ref('initial');
 const canvasElement = ref<HTMLCanvasElement | null>(null);
-const canvasData = reactive({
-  width: 1024,
-  height: 576
-});
+// const canvasData = reactive({
+//   width: 1024,
+//   height: 576
+// });
+const layoutStore = useLayoutStore();
+
+const { canvasData } = toRefs(layoutStore);
 
 watch(cursor, () => {
   emit('update:cursor', cursor.value)
@@ -73,3 +77,9 @@ function handleMouseLeave(_event: MouseEvent) {
     @mouseleave="handleMouseLeave"
   />
 </template>
+
+<style lang="scss" scoped>
+canvas {
+  width: 100%;
+}
+</style>

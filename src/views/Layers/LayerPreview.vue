@@ -3,6 +3,7 @@ import { computed, toRefs } from "vue";
 import {CanvasItem} from "../../types.ts";
 import Keyframes from "./Keyframes/Keyframes.vue";
 import { useTimeStore } from "../../store/timeStore.ts";
+import { useKeyFramesStore } from "@/store/canvas/canvasItems/keyFramesStore.ts";
 
 interface Props {
   canvasItem: CanvasItem | null
@@ -12,6 +13,24 @@ const props = defineProps<Props>();
 const emits = defineEmits(['input']);
 const { canvasItem } = toRefs(props);
 const timeStore = useTimeStore();
+
+const keyFramesStore = useKeyFramesStore();
+
+const isDisabled = computed(() => {
+  return !!keyFramesStore.getKeyFrames(canvasItem.value?.id);
+});
+
+const keyFrames = computed(
+    {
+      get() {
+        return keyFramesStore.getKeyFrames(canvasItem.value?.id);
+      },
+      set(e) {
+        return keyFramesStore.setKeyFrames(canvasItem.value?.id, e);
+      }
+    }
+);
+
 const canvasItemLayout = computed(
     {
       get() {
@@ -83,6 +102,7 @@ function handleAddKeyframe(canvasItem: CanvasItem | null) {
           </label>
           <div>
             <input
+                :disabled="isDisabled"
                 class="input"
                 type="number"
                 :value="canvasItemLayout.coordinates.x"
@@ -96,6 +116,7 @@ function handleAddKeyframe(canvasItem: CanvasItem | null) {
           </label>
           <div>
             <input
+                :disabled="isDisabled"
                 class="input"
                 type="number"
                 v-model="canvasItemLayout.coordinates.y"
@@ -109,6 +130,7 @@ function handleAddKeyframe(canvasItem: CanvasItem | null) {
           </label>
           <div>
             <input
+                :disabled="isDisabled"
                 class="input"
                 type="number"
                 v-model="canvasItemLayout.dimensions.width"
@@ -123,6 +145,7 @@ function handleAddKeyframe(canvasItem: CanvasItem | null) {
           </label>
           <div>
             <input
+                :disabled="isDisabled"
                 class="input"
                 type="number"
                 v-model="canvasItemLayout.dimensions.height"
@@ -136,6 +159,7 @@ function handleAddKeyframe(canvasItem: CanvasItem | null) {
           </label>
           <div>
             <input
+                :disabled="isDisabled"
                 class="input"
                 type="text"
                 v-model="canvasItemLayout.rotation"
@@ -149,6 +173,7 @@ function handleAddKeyframe(canvasItem: CanvasItem | null) {
           </label>
           <div>
             <input
+                :disabled="isDisabled"
                 class="input"
                 type="text"
                 v-model="canvasItemLayout.opacity"
@@ -164,7 +189,7 @@ function handleAddKeyframe(canvasItem: CanvasItem | null) {
             <a v-if="canvasItem.keyframes" @click="canvasItem.keyframes = null">Delete</a>
           </div>
           <div>
-            <Keyframes v-if="canvasItem.keyframes" v-model:key-frames="canvasItem.keyframes" />
+            <Keyframes v-if="canvasItem.keyframes" v-model:key-frames="keyFrames" />
             <button @click="() => handleAddKeyframe(canvasItem)" class="add-keyframe-button">+ Keyframe</button>
           </div>
         </div>

@@ -4,8 +4,8 @@ import {RenderItem} from "../shared/types.ts";
 export function drawItemEditBox(context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D, renderItem: RenderItem) {
     //Move to item corner
     context.beginPath();
-    context.strokeStyle = "#8494b9";
-    context.fillStyle = "#8494b9";
+    context.strokeStyle = "#4f85de";
+    context.fillStyle = "#4f85de";
     context.lineWidth = 2;
 
     context.translate(renderItem.x, renderItem.y);

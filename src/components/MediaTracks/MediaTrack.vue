@@ -11,6 +11,7 @@ const emit = defineEmits(['moveTrackItem', 'resizeTrackItem']);
 import { computed, Ref, ref } from "vue";
 import { ResizeDirection } from "./MediaTracksTypes.ts";
 import Draggable from "../Draggable.vue";
+import { useLayoutStore } from "@/store/layout/layoutStore.ts";
 
 const { track, canvasItem } = defineProps<Props>();
 
@@ -20,12 +21,14 @@ const left = ref(canvasItem.start / 160); // TODO do we need canvasItem.start an
 const width = ref(canvasItem.duration / 160);
 const resizing = ref(false) as Ref <ResizeDirection|boolean>
 
+const layoutStore = useLayoutStore();
+
 const mediaTrackItemStyles = computed(() => {
   return {
     width: `${width.value}rem`,
     transform: `translateX(${left.value}rem)`,
     backgroundImage: `url(${track.src})`,
-    backgroundSize: `${track.size}rem`
+    backgroundSize: `${track.size}rem`,
   }
 });
 
@@ -60,10 +63,14 @@ function resize(e: number) {
   emit('resizeTrackItem', track.renderItemId, _left, _width);
   // resizeTrackItem(track.renderItemId, _left, _width); // TODO move one layer or 2 layers up
 }
+
+const height = computed(() => {
+  return layoutStore.getLayerTrackHeight(track.renderItemId)
+})
 </script>
 
 <template>
-  <div class="media-track">
+  <div class="media-track" :style="{height: `${height}px`}">
     <Draggable
         :with-skalatone="true"
         :style="mediaTrackItemStyles"
@@ -114,7 +121,9 @@ function resize(e: number) {
   }
 }
 .media-track {
-  height: 2.5rem;
+  > div {
+    height: $timelineLayerHeight;
+  }
 }
 .media-track-item-resize-right {
   position: absolute;

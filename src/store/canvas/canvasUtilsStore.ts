@@ -59,7 +59,7 @@ export const useCanvasUtilsStore = defineStore('canvasUtilsStore', () => {
         let x1, y1 = 0;
         for (let i = canvasItems.value.length - 1; i >= 0; i--) {
             const item: CanvasItem = canvasItems.value[i];
-
+            console.log(item);
             if (!item.isVisible) continue;
             if (item.isHidden) continue;
             if (!widthKeyframes && item.keyframes) continue;

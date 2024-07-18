@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import LayerAccordion from "@/views/Layers/LayerAccordion.vue";
+import LayerAccordion from "@/views/Layers/Actions/Accordion/Accordion.vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faTrashCan } from "@fortawesome/free-solid-svg-icons";
+import Keyframes from "@/views/Layers/Keyframes/Keyframes.vue";
+import { CanvasItem } from "@/types.ts";
+import Transform from "@/views/Layers/Actions/Transform/Transform.vue";
 interface Props {
   visible: boolean
+  layer: CanvasItem
 }
 
 const props = defineProps<Props>();
@@ -26,24 +30,7 @@ const emit = defineEmits(['update:visible', 'delete-layer']);
     </template>
 
     <template #transform>
-      <div>
-        <div>
-          <label>Position X</label>
-          <input type="text" />
-        </div>
-        <div>
-          <label>Position Y</label>
-          <input type="text" />
-        </div>
-        <div>
-          <label>Width</label>
-          <input type="text" />
-        </div>
-        <div>
-          <label>Height</label>
-          <input type="text" />
-        </div>
-      </div>
+      <Transform />
     </template>
   </LayerAccordion>
 </template>

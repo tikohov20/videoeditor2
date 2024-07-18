@@ -65,6 +65,9 @@ const secondExpanded = ref(false);
     margin-right: .5rem;
     color: $color-primary-dark;
   }
+  :deep(.accordion-heading) {
+    height: $timelineLayerHeight;
+  }
   &.expanded {
     :deep(.accordion-heading-icon) {
       &.trigger {

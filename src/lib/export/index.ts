@@ -45,7 +45,7 @@ export async function exportCanvas(
         width: canvas.width,
         height: canvas.height,
         bitrate,
-        bitrateMode: "constant",
+        bitrateMode: "variable",
     });
 
 

@@ -17,11 +17,13 @@ import LayerPreviewContainer from "./views/Containers/LayerPreviewContainer.vue"
 import Canvas from "./views/Canvas/Canvas.vue";
 import Files from "./views/Files/Files.vue";
 import { useMagicKeys, whenever } from "@vueuse/core";
+import { useLayoutStore } from "@/store/layout/layoutStore.ts";
 
 const actionHistoryStore = useActionHistoryStore();
 const canvasContextStore = useCanvasContextStore();
 const canvasItemsStore = useCanvasItemsStore();
 const filesStore = useFilesStore();
+const layoutStore = useLayoutStore();
 
 const { canvasItems } = storeToRefs(canvasItemsStore);
 
@@ -38,7 +40,7 @@ async function handleUpload(file: File) {
 }
 
 function exportCanvasMP4() {
-  exportCanvas(canvasContextStore.canvas as HTMLCanvasElement, canvasItems.value, 0, 3000, 30, 3500_000, 1024, 576);
+  exportCanvas(canvasContextStore.canvas as HTMLCanvasElement, canvasItems.value, 0, 3000, 30, 3_500_000, layoutStore.canvasData.width, layoutStore.canvasData.height);
 }
 
 let isPreviousMetaOrCtrl = false;
@@ -52,10 +54,16 @@ window.addEventListener('keydown', function(ev: KeyboardEvent) {
 });
 
 async function handleAddFileToCanvas(file: ParsedFile) {
+  const canvasWidth = layoutStore.canvasData.width;
+  const canvasHeight = layoutStore.canvasData.height;
+
   const _file = new File([file.arrayBuffer], file.name, { type: file.fileType })
-  const canvasItem = await parse(_file, { width: 1024, height: 576 });
+  const canvasItem = await parse(_file, { width: canvasWidth, height: canvasHeight });
   canvasItemsStore.addCanvasItem(canvasItem);
   actionHistoryStore.saveCanvasItemAction(canvasItem);
+
+  const canvasItemText = await parse('Text', {width: canvasWidth, height: canvasHeight});
+  canvasItemsStore.addCanvasItem(canvasItemText);
 }
 
 </script>

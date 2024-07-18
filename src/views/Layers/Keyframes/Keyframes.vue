@@ -5,7 +5,7 @@ import { computed } from "vue";
 import { number } from "mathjs";
 
 interface Props {
-  keyFrames: KeyFrames
+  keyFrames?: KeyFrames | null
 }
 
 interface ComputedKeyFrame extends Keyframe {
@@ -16,6 +16,8 @@ const props = defineProps<Props>();
 const emit = defineEmits(['update:keyFrames']);
 
 const computedKeyframes = computed(() => {
+  if(!props.keyFrames) return {};
+
   return Object.entries(props.keyFrames).map(entry => {
     return {
       ...entry[1],

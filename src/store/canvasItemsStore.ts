@@ -1,8 +1,9 @@
 import { defineStore } from "pinia";
-import { CanvasItem } from "../types.ts";
+import { CanvasItem, CanvasItemId } from "../types.ts";
 import { getTransformationMatrix } from "../lib/shared/helpers.ts";
 import { parse } from "../lib/parsers";
 import { isNumber } from "mathjs";
+import { RenderItemTypes } from "@/lib/shared/types.ts";
 
 export const useCanvasItemsStore = defineStore('canvasItems', {
     state() {
@@ -83,6 +84,15 @@ export const useCanvasItemsStore = defineStore('canvasItems', {
 
             return canvasItem;
         },
+        updateCanvasItemName(id: CanvasItemId, name?: string) {
+            const canvasItem = this.canvasItem(id);
+            if (!canvasItem) return;
+
+            if (name) {
+                canvasItem.name = name;
+            }
+            return canvasItem;
+        },
         updateCanvasItemProperties(
             id: number,
             properties: {
@@ -113,6 +123,13 @@ export const useCanvasItemsStore = defineStore('canvasItems', {
             if (isNumber(properties.opacity)) {
                 canvasItem.opacity = properties.opacity;
             }
+            let scaleX = canvasItem.width / canvasItem.initialWidth;
+            let scaleY = canvasItem.height / canvasItem.initialHeight;
+
+            if (canvasItem.itemType === RenderItemTypes.TEXT) {
+                scaleX = 1;
+                scaleY = 1;
+            }
 
             canvasItem.matrix = getTransformationMatrix({
                 x: canvasItem.x,
@@ -122,12 +139,12 @@ export const useCanvasItemsStore = defineStore('canvasItems', {
                     x: canvasItem.width / 2,
                     y: canvasItem.height / 2
                 },
-                scaleX: canvasItem.width / canvasItem.initialWidth,
-                scaleY: canvasItem.height / canvasItem.initialHeight
+                scaleX,
+                scaleY
             });
 
-            canvasItem.scaleX = canvasItem.width / canvasItem.initialWidth;
-            canvasItem.scaleY = canvasItem.height / canvasItem.initialHeight;
+            canvasItem.scaleX = scaleX;
+            canvasItem.scaleY = scaleY;
             return canvasItem;
         },
         moveCanvasItem(id: number, x: number, y: number) {

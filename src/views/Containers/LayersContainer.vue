@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
 
-import Layers from "../Layers/Layers.vue";
 import { useCanvasItemsStore } from "../../store/canvasItemsStore.ts";
+import Actions from "@/views/Layers/Actions/Actions.vue";
 
 const canvasItemsStore = useCanvasItemsStore();
 const { canvasItems } = storeToRefs(canvasItemsStore);
@@ -12,9 +12,9 @@ const { canvasItems } = storeToRefs(canvasItemsStore);
 <template>
   <div class="layers-container">
     <div class="layer-hat">
-
+      Info here, later
     </div>
-    <Layers :layers="canvasItems" />
+    <Actions :layers="canvasItems" />
   </div>
 </template>
 
@@ -26,8 +26,8 @@ const { canvasItems } = storeToRefs(canvasItemsStore);
   border-bottom: 0.25rem solid #1a1a1a;
   .layer-hat {
     height: 2rem;
-    opacity: .2;
-    background: black;
+    //opacity: .2;
+    background: #202020;
   }
 }
 </style>

@@ -99,7 +99,12 @@ export interface RenderItemText extends Modify<RenderItem, {
     itemType: RenderItemTypes.TEXT,
     bitMap: null,
     textData: {
-        text: string
+        text: string,
+        lineWidth: number,
+        fillStyle: string,
+        strokeStyle: string,
+        font: string,
+        fontSize: number
     }
 }> {}
 
