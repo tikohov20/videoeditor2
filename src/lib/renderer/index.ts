@@ -4,7 +4,6 @@ import { drawItemEditBox } from "./utils.ts";
 import { handleKeyframes } from "../keyframes";
 import { getTransformationMatrix } from "../shared/helpers.ts";
 import { number } from "mathjs";
-import { timestamp } from "@vueuse/core";
 
 export function renderTimestamp(
     canvas: HTMLCanvasElement | OffscreenCanvas,
@@ -16,7 +15,6 @@ export function renderTimestamp(
 ) {
     // @ts-ignore
     const { width, height } = canvas;
-
     // Always fresh canvas before rendering frame
     context.reset();
 
@@ -28,7 +26,11 @@ export function renderTimestamp(
             continue;
         }
         const itemFrame = getFrame(timeStamp, renderItem) as ImageBitmap | null;
-        if(!(itemFrame instanceof ImageBitmap)) continue;
+        if(!(itemFrame instanceof ImageBitmap)) {
+            renderItem.isVisible = false;
+            continue;
+        }
+        renderItem.isVisible = true;
 
         //TODO should we add a property to the item if it's visible or not ?
         /**
@@ -54,10 +56,11 @@ export function renderTimestamp(
         if (renderItem.keyframes) {
             keyFrameresult = handleKeyframes(timeStamp, renderItem.keyframes);
             if (keyFrameresult) {
-                // renderItem.x = number(result.x);
-                // renderItem.y = number(result.y);
-                // renderItem.width = number(result.width);
-                // renderItem.height = number(result.height);
+                renderItem.x = Math.round(number(keyFrameresult.x));
+                renderItem.y = Math.round(number(keyFrameresult.y));
+                renderItem.width = Math.round(number(keyFrameresult.width));
+                renderItem.height = Math.round(number(keyFrameresult.height));
+
                 keyFrameMatrix = getTransformationMatrix({
                     x: number(keyFrameresult.x),
                     y: number(keyFrameresult.y),
@@ -96,10 +99,9 @@ function renderText(renderItem: RenderItemText, timeStamp: number, context: Canv
     context.fillStyle = renderItem.textData.fillStyle;
     context.lineWidth = renderItem.textData.lineWidth;
 
-    // Why 0.8 ? I have no clue...
-    const lineHeight = 0.8 * renderItem.textData.fontSize;
+    const lineHeight = renderItem.textData.fontSize;
 
-    printAt(context, renderItem.textData.text, 0, 0.8 * renderItem.textData.fontSize, 0.8 * renderItem.textData.fontSize, renderItem.width)
+    printAt(context, renderItem.textData.text, 0, 0.8 * renderItem.textData.fontSize, lineHeight, renderItem.width)
     // context.fillRect(0, 0, 50, 50);
     // context.clearRect(45, 45, 60, 60);
     // context.strokeRect(50, 50, 50, 50);

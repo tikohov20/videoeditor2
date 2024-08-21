@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CanvasItem, TrackItem } from "../../types.ts";
+import { CanvasItem, TrackItem } from "@/types.ts";
 
 interface Props {
   track: TrackItem,
@@ -12,6 +12,8 @@ import { computed, Ref, ref } from "vue";
 import { ResizeDirection } from "./MediaTracksTypes.ts";
 import Draggable from "../Draggable.vue";
 import { useLayoutStore } from "@/store/layout/layoutStore.ts";
+import { useTimeStore } from "@/store/timeStore.ts";
+import { storeToRefs } from "pinia";
 
 const { track, canvasItem } = defineProps<Props>();
 
@@ -22,6 +24,9 @@ const width = ref(canvasItem.duration / 160);
 const resizing = ref(false) as Ref <ResizeDirection|boolean>
 
 const layoutStore = useLayoutStore();
+const timeStore = useTimeStore();
+
+const { timeStamp } = storeToRefs(timeStore);
 
 const mediaTrackItemStyles = computed(() => {
   return {
@@ -31,6 +36,12 @@ const mediaTrackItemStyles = computed(() => {
     backgroundSize: `${track.size}rem`,
   }
 });
+
+const keyframeStyles = (keyFrame, time: number) => {
+  return {
+    transform: `translate(calc(${time / 160}rem - 50%), -50%)`
+  }
+}
 
 const skalatoneStyles = computed(() => {
   return {
@@ -64,6 +75,10 @@ function resize(e: number) {
   // resizeTrackItem(track.renderItemId, _left, _width); // TODO move one layer or 2 layers up
 }
 
+function handleKeyframeClick(time: number) {
+  timeStamp.value = time;
+}
+
 const height = computed(() => {
   return layoutStore.getLayerTrackHeight(track.renderItemId)
 })
@@ -71,6 +86,10 @@ const height = computed(() => {
 
 <template>
   <div class="media-track" :style="{height: `${height}px`}">
+    <div class="keyframes">
+      <a v-for="(item, key) of canvasItem.keyframes" @click="() => handleKeyframeClick(key)" class="keyframe" :style="keyframeStyles(item, key)"></a>
+    </div>
+
     <Draggable
         :with-skalatone="true"
         :style="mediaTrackItemStyles"
@@ -78,8 +97,6 @@ const height = computed(() => {
         cursor="move"
         class="media-track-item"
     >
-      <div :style="skalatoneStyles" v-if="resizing" class="media-track-item-resize-skalatone"></div>
-
       <Draggable
           v-model:offset="offset"
           :with-skalatone="true"
@@ -103,26 +120,40 @@ const height = computed(() => {
           class="media-track-item-resize-right"
           skalatone-border="none"
       />
+      <div :style="skalatoneStyles" v-if="resizing" class="media-track-item-resize-skalatone"></div>
     </Draggable>
   </div>
 </template>
 
 <style lang="scss" scoped>
 .media-track-item {
-  height: 100%;
+  height: $timelineLayerHeight;
   background-color: #1a1a1a;
   position: relative;
   background-size: contain;
   background-repeat: repeat-x;
-
   &.resizing {
     border: 1px solid #266dcd;
     border-left: none;
   }
 }
 .media-track {
-  > div {
-    height: $timelineLayerHeight;
+  position: relative;
+  .keyframes {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    bottom: 0;
+    .keyframe {
+      background: #266dcd;
+      display: block;
+      cursor: pointer;
+      position: absolute;
+      pointer-events: all;
+      width: 10px;
+      height: 10px;
+      top: calc($timelineLayerHeight / 2);
+    }
   }
 }
 .media-track-item-resize-right {

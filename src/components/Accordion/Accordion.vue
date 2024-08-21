@@ -12,6 +12,7 @@ const props = withDefaults(defineProps<Props>(), {
   expanded: false,
   iconLeft: false,
 })
+
 const emit = defineEmits(['update:expanded']);
 
 const isExpanded = ref(false);

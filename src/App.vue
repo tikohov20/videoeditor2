@@ -16,9 +16,10 @@ import TimeLineContainer from "./views/Containers/TimeLineContainer.vue";
 import LayerPreviewContainer from "./views/Containers/LayerPreviewContainer.vue";
 import Canvas from "./views/Canvas/Canvas.vue";
 import Files from "./views/Files/Files.vue";
-import { useMagicKeys, whenever } from "@vueuse/core";
 import { useLayoutStore } from "@/store/layout/layoutStore.ts";
+import { useSettingsStore } from "@/store/settingsStore.ts";
 
+const settingsStore = useSettingsStore();
 const actionHistoryStore = useActionHistoryStore();
 const canvasContextStore = useCanvasContextStore();
 const canvasItemsStore = useCanvasItemsStore();
@@ -26,6 +27,7 @@ const filesStore = useFilesStore();
 const layoutStore = useLayoutStore();
 
 const { canvasItems } = storeToRefs(canvasItemsStore);
+const { magnetise } = storeToRefs(settingsStore);
 
 const canvasComponent = ref<InstanceType<typeof Canvas>>();
 const files = ref<IFile[]>([]);
@@ -62,8 +64,8 @@ async function handleAddFileToCanvas(file: ParsedFile) {
   canvasItemsStore.addCanvasItem(canvasItem);
   actionHistoryStore.saveCanvasItemAction(canvasItem);
 
-  const canvasItemText = await parse('Text', {width: canvasWidth, height: canvasHeight});
-  canvasItemsStore.addCanvasItem(canvasItemText);
+  // const canvasItemText = await parse('Text', {width: canvasWidth, height: canvasHeight});
+  // canvasItemsStore.addCanvasItem(canvasItemText);
 }
 
 </script>
@@ -72,6 +74,16 @@ async function handleAddFileToCanvas(file: ParsedFile) {
   <div :style="{cursor}">
     <div class="main-content">
       <div class="top-container">
+
+        <div></div>
+
+        <div class="player-hat">
+          <label for="magnetise">Magnetise</label>
+          <input id="magnetise" v-model="magnetise" type="checkbox"/>
+        </div>
+
+        <div></div>
+
         <div class="left-container">
           <Files @add-file-to-canvas="handleAddFileToCanvas" />
         </div>
@@ -98,13 +110,18 @@ async function handleAddFileToCanvas(file: ParsedFile) {
   display: flex;
   align-items: center;
   flex-direction: column;
-
   .top-container {
     width: 100%;
     display: grid;
     grid-template-columns: auto 1024px 300px;
     margin-bottom: 1rem;
-    margin-top: 1rem;
+
+    .player-hat {
+      height: 3rem;
+      margin: 0 auto;
+      width: 100%;
+      border: 1px solid #555555;
+    }
   }
   .player-container {
     width: 1024px;

@@ -1,7 +1,7 @@
 import { defineStore, storeToRefs } from "pinia";
 import { ref, watch } from "vue";
 import { Canvas } from "canvas";
-import { renderTimestamp } from "../../lib/renderer";
+import { renderTimestamp } from "@/lib/renderer";
 import { useTimeStore } from "../timeStore.ts";
 import { useCanvasItemsStore } from "../canvasItemsStore.ts";
 
@@ -22,7 +22,7 @@ export const useCanvasContextStore = defineStore('canvas/canvasContextStore', ()
     const offscreenCanvasContext = ref<OffscreenCanvasRenderingContext2D>(offscreenCanvasHtml.getContext("2d", {
         desynchronized: true,
         willReadFrequently: true
-    }))
+    }));
 
     function setup(htmlCanvas: HTMLCanvasElement) {
         canvas.value = htmlCanvas;
@@ -35,7 +35,9 @@ export const useCanvasContextStore = defineStore('canvas/canvasContextStore', ()
     function renderCanvas() {
         if (!canvas.value || !context.value) return
 
-        allowRendering && renderTimestamp(canvas.value, context.value, timeStore.timeStamp, canvasItemsStore.canvasItems);
+        if (allowRendering) {
+            renderTimestamp(canvas.value, context.value, timeStore.timeStamp, canvasItemsStore.canvasItems);
+        }
     }
 
     function initRenderWatchers() {
@@ -46,7 +48,7 @@ export const useCanvasContextStore = defineStore('canvas/canvasContextStore', ()
 
         watch(canvasItems, () => {
             renderCanvas();
-        }, {
+        },{
             deep: true
         })
     }

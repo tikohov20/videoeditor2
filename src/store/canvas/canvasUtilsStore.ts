@@ -5,11 +5,19 @@ import { CanvasItem, CanvasItemAction } from "../../types.ts";
 import { invertMatrix } from "../../lib/shared/helpers.ts";
 import { RemToMilliSeconds } from "../../lib/shared/types.ts";
 import { stickCanvasItemToImportantPositions } from "./utils";
+import { useSettingsStore } from "@/store/settingsStore.ts";
+import { useTimeStore } from "@/store/timeStore.ts";
+import { handleKeyframes } from "@/lib/keyframes";
 
 //TODO don't like the name...
 export const useCanvasUtilsStore = defineStore('canvasUtilsStore', () => {
     const canvasItemsStore = useCanvasItemsStore();
+    const settingsStore = useSettingsStore();
+    const timeStore = useTimeStore();
+
     const { canvasItems} = storeToRefs(canvasItemsStore);
+    const { magnetise } = storeToRefs(settingsStore);
+    const { timeStamp } = storeToRefs(timeStore);
     const activeItem = ref<CanvasItem | null>(null);
 
     const canvasItemMouseMoveData = ref(getDefaultCanvasItemMouseMoveData());
@@ -41,7 +49,7 @@ export const useCanvasUtilsStore = defineStore('canvasUtilsStore', () => {
                 return { clickedItem: activeItem, actionType, cursor: getCursorFromActionType(actionType) }
             }
         }
-        clickedElement = findItemAtCoordinates(x, y);
+        clickedElement = findItemAtCoordinates(x, y, timeStamp.value);
 
         if (!clickedElement) {
             activeItem.value = null;
@@ -54,20 +62,28 @@ export const useCanvasUtilsStore = defineStore('canvasUtilsStore', () => {
         return { clickedItem: activeItem, actionType, cursor: getCursorFromActionType(actionType) };
     }
 
-    function findItemAtCoordinates(x: number, y: number, widthKeyframes = true) {
+    function findItemAtCoordinates(x: number, y: number, timeStamp = 0) {
         // last element of array is on the top of the canvas
         let x1, y1 = 0;
         for (let i = canvasItems.value.length - 1; i >= 0; i--) {
             const item: CanvasItem = canvasItems.value[i];
-            console.log(item);
+            const localItem = { ...item };
             if (!item.isVisible) continue;
             if (item.isHidden) continue;
-            if (!widthKeyframes && item.keyframes) continue;
+
+            if (item.keyframes) {
+                const keyFrameResult = handleKeyframes(timeStamp, item.keyframes);
+                localItem.x = keyFrameResult?.x ?? localItem.x;
+                localItem.y = keyFrameResult?.y ?? localItem.y;
+                localItem.width = keyFrameResult?.width ?? localItem.width;
+                localItem.height = keyFrameResult?.height ?? localItem.height;
+            }
             //TODO doesn't work lol ( next time explain what doesn't work you dummy... )
             //Change coordinate system
+
             const { a,b,c,d,e,f } = item.matrix.scale(1/item.scaleX, 1/item.scaleY)
-            const centerX = item.x + item.width / 2;
-            const centerY = item.y + item.height / 2;
+            const centerX = localItem.x + localItem.width / 2;
+            const centerY = localItem.y + localItem.height / 2;
             const localX = x - centerX;
             const localY = y - centerY;
 
@@ -78,10 +94,10 @@ export const useCanvasUtilsStore = defineStore('canvasUtilsStore', () => {
             y1 = localX * inverse[1][0] + localY * inverse[1][1];
 
             if (
-                x1 >= -item.width / 2 &&
-                x1 <= item.width / 2 &&
-                y1 >= -item.height / 2 &&
-                y1 <= item.height / 2
+                x1 >= -localItem.width / 2 &&
+                x1 <= localItem.width / 2 &&
+                y1 >= -localItem.height / 2 &&
+                y1 <= localItem.height / 2
             ) {
                 return item;
             }
@@ -178,28 +194,48 @@ export const useCanvasUtilsStore = defineStore('canvasUtilsStore', () => {
                     dimensions.height = initialHeight - offsetY + initialMouseY;
                     break;
             }
-            canvasItemsStore.updateCanvasItemProperties(canvasItem.id, {
-                coordinates,
-                dimensions,
-                rotation: canvasItem.rotation,
-                opacity: canvasItem.opacity
-            });
+
+            if (!canvasItem.keyframes) {
+                canvasItemsStore.updateCanvasItemProperties(canvasItem.id, {
+                    coordinates,
+                    dimensions,
+                    rotation: canvasItem.rotation,
+                    opacity: canvasItem.opacity
+                });
+            }
+
+            if (canvasItem.keyframes) {
+                if (canvasItem.keyframes[timeStamp.value]) {
+                    canvasItem.keyframes[timeStamp.value].x = coordinates.x
+                    canvasItem.keyframes[timeStamp.value].y = coordinates.y
+                    canvasItem.keyframes[timeStamp.value].width = dimensions.width
+                    canvasItem.keyframes[timeStamp.value].height = dimensions.height
+                }
+            }
             return;
         }
 
         let x = initialX + offsetX - initialMouseX;
         let y = initialY + offsetY - initialMouseY;
 
-        [x, y] = stickCanvasItemToImportantPositions(x, y, canvasItem, canvasItems.value);
-        if(canvasItem.keyframes) return;
+        if (magnetise.value) {
+            [x, y] = stickCanvasItemToImportantPositions(x, y, canvasItem, canvasItems.value);
+        }
+
+        if(canvasItem.keyframes) {
+            if (canvasItem.keyframes[timeStamp.value]) {
+                canvasItem.keyframes[timeStamp.value].x = x
+                canvasItem.keyframes[timeStamp.value].y = y
+            }
+            return;
+        }
+
         canvasItemsStore.moveCanvasItem(canvasItem.id, x, y)
     }
 
     function resetCanvasItemMouseMoveAction() {
         canvasItemMouseMoveData.value = getDefaultCanvasItemMouseMoveData();
     }
-
-
 
     function moveTrackItem(id: number, offsetX: number): CanvasItem {
         const canvasItem = canvasItemsStore.canvasItem(id)
