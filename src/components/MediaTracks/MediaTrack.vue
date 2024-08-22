@@ -1,32 +1,32 @@
 <script setup lang="ts">
+import { computed, Ref, ref } from "vue";
+import { storeToRefs } from "pinia";
+
+import { useLayoutStore } from "@/store/layout/layoutStore.ts";
+import { useTimeStore } from "@/store/timeStore.ts";
+
 import { CanvasItem, TrackItem } from "@/types.ts";
+import { ResizeDirection } from "./MediaTracksTypes.ts";
+
+import Draggable from "../Draggable.vue";
+import Keyframes from "@/components/MediaTracks/Keyframes/Keyframes.vue";
 
 interface Props {
   track: TrackItem,
   canvasItem: CanvasItem
 }
 
-const emit = defineEmits(['moveTrackItem', 'resizeTrackItem']);
-
-import { computed, Ref, ref } from "vue";
-import { ResizeDirection } from "./MediaTracksTypes.ts";
-import Draggable from "../Draggable.vue";
-import { useLayoutStore } from "@/store/layout/layoutStore.ts";
-import { useTimeStore } from "@/store/timeStore.ts";
-import { storeToRefs } from "pinia";
-
 const { track, canvasItem } = defineProps<Props>();
-
-// TODO should access the store whatsoever
-const offset = ref(0);
-const left = ref(canvasItem.start / 160); // TODO do we need canvasItem.start and preview.start ?
-const width = ref(canvasItem.duration / 160);
-const resizing = ref(false) as Ref <ResizeDirection|boolean>
+const emit = defineEmits(['moveTrackItem', 'resizeTrackItem']);
 
 const layoutStore = useLayoutStore();
 const timeStore = useTimeStore();
-
 const { timeStamp } = storeToRefs(timeStore);
+
+const offset = ref(0);
+const left = ref(canvasItem.start / 160);
+const width = ref(canvasItem.duration / 160);
+const resizing = ref(false) as Ref <ResizeDirection|boolean>
 
 const mediaTrackItemStyles = computed(() => {
   return {
@@ -37,18 +37,16 @@ const mediaTrackItemStyles = computed(() => {
   }
 });
 
-const keyframeStyles = (keyFrame, time: number) => {
-  return {
-    transform: `translate(calc(${time / 160}rem - 50%), -50%)`
-  }
-}
-
 const skalatoneStyles = computed(() => {
   return {
     left: resizing.value === ResizeDirection.Left ? `${offset.value}px` : 0,
     right: resizing.value === ResizeDirection.Right ? `${-offset.value}px` : 0,
   }
-})
+});
+
+const height = computed(() => {
+  return layoutStore.getLayerTrackHeight(track.renderItemId)
+});
 
 function handleDrag(e: number) {
   const offsetX = left.value + e / 16 < 0 ? 0 : left.value + e / 16;
@@ -78,17 +76,11 @@ function resize(e: number) {
 function handleKeyframeClick(time: number) {
   timeStamp.value = time;
 }
-
-const height = computed(() => {
-  return layoutStore.getLayerTrackHeight(track.renderItemId)
-})
 </script>
 
 <template>
   <div class="media-track" :style="{height: `${height}px`}">
-    <div class="keyframes">
-      <a v-for="(item, key) of canvasItem.keyframes" @click="() => handleKeyframeClick(key)" class="keyframe" :style="keyframeStyles(item, key)"></a>
-    </div>
+    <Keyframes @update:time="handleKeyframeClick" :key-frames="canvasItem.keyframes" class="keyframes" />
 
     <Draggable
         :with-skalatone="true"
@@ -139,22 +131,6 @@ const height = computed(() => {
 }
 .media-track {
   position: relative;
-  .keyframes {
-    position: absolute;
-    z-index: 1;
-    top: 0;
-    bottom: 0;
-    .keyframe {
-      background: #266dcd;
-      display: block;
-      cursor: pointer;
-      position: absolute;
-      pointer-events: all;
-      width: 10px;
-      height: 10px;
-      top: calc($timelineLayerHeight / 2);
-    }
-  }
 }
 .media-track-item-resize-right {
   position: absolute;

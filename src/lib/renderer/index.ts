@@ -25,23 +25,10 @@ export function renderTimestamp(
             renderText(renderItem as RenderItemText, timeStamp, context);
             continue;
         }
+
         const itemFrame = getFrame(timeStamp, renderItem) as ImageBitmap | null;
-        if(!(itemFrame instanceof ImageBitmap)) {
+        if (!(itemFrame instanceof ImageBitmap)) {
             renderItem.isVisible = false;
-            continue;
-        }
-        renderItem.isVisible = true;
-
-        //TODO should we add a property to the item if it's visible or not ?
-        /**
-         * isVisible = true|false
-         * will probably change this later, because I don't want this function to modify the state...
-         */
-
-        // TODO what does this do ??? describe first then remove ( optionally )
-        if (!itemFrame) {
-            renderItem.isVisible = false;
-            renderItem.isActive = false;
             continue;
         }
 
@@ -74,7 +61,7 @@ export function renderTimestamp(
                 });
             }
         }
-        context.setTransform(keyFrameMatrix || renderItem.matrix);
+        context.setTransform(renderItem.matrix);
 
         // x: 0, y: 0 is top left corner, real x and y are controlled through the transformation matrix
         context.drawImage(itemFrame, 0, 0);
@@ -82,7 +69,7 @@ export function renderTimestamp(
 
         context.resetTransform();
         if (drawTools && renderItem.isActive) {
-            drawItemEditBox(context, {...renderItem, ...keyFrameresult})
+            drawItemEditBox(context, renderItem)
         }
         context.resetTransform();
     }
@@ -119,26 +106,18 @@ function renderText(renderItem: RenderItemText, timeStamp: number, context: Canv
     }
 }
 
-function printAt( context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D , text: string, x: number, y: number, lineHeight: number, fitWidth: number)
-{
+function printAt( context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D , text: string, x: number, y: number, lineHeight: number, fitWidth: number) {
     fitWidth = fitWidth || 0;
 
-    if (fitWidth <= 0)
-    {
+    if (fitWidth <= 0) {
         context.fillText( text, x, y );
         return;
     }
 
-    // for (let i = 1; i < text.length ; i++) {
-    //     context.fill
-    // }
-
-    for (let idx = 1; idx <= text.length; idx++)
-    {
+    for (let idx = 1; idx <= text.length; idx++) {
         let str = text.substring(0, idx);
 
-        if (context.measureText(str).width > fitWidth)
-        {
+        if (context.measureText(str).width > fitWidth) {
             if(str.length !== 1) {
                 context.fillText( text.substring(0, idx-1), x, y );
                 printAt(context, text.substring(idx-1).trim(), x, y + lineHeight, lineHeight,  fitWidth);

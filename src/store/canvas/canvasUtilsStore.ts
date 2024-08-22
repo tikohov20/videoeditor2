@@ -8,10 +8,12 @@ import { stickCanvasItemToImportantPositions } from "./utils";
 import { useSettingsStore } from "@/store/settingsStore.ts";
 import { useTimeStore } from "@/store/timeStore.ts";
 import { handleKeyframes } from "@/lib/keyframes";
+import { useCanvasContextStore } from "@/store/canvas/canvasContextStore.ts";
 
 //TODO don't like the name...
 export const useCanvasUtilsStore = defineStore('canvasUtilsStore', () => {
     const canvasItemsStore = useCanvasItemsStore();
+    const canvasContextStore= useCanvasContextStore();
     const settingsStore = useSettingsStore();
     const timeStore = useTimeStore();
 
@@ -58,6 +60,7 @@ export const useCanvasUtilsStore = defineStore('canvasUtilsStore', () => {
 
         activeItem.value = clickedElement;
         activeItem.value.isActive = true;
+        canvasContextStore.renderCanvas();
 
         return { clickedItem: activeItem, actionType, cursor: getCursorFromActionType(actionType) };
     }
@@ -148,89 +151,92 @@ export const useCanvasUtilsStore = defineStore('canvasUtilsStore', () => {
         }
     }
     function canvasItemMouseMoveAction(event: MouseEvent) {
-        const {
-            isResizing,
-            canvasItem,
-            initialX,
-            initialY,
-            initialMouseY,
-            initialMouseX,
-            initialWidth,
-            initialHeight,
-            actionType
-        } = canvasItemMouseMoveData.value;
+        (function() {
+            const {
+                isResizing,
+                canvasItem,
+                initialX,
+                initialY,
+                initialMouseY,
+                initialMouseX,
+                initialWidth,
+                initialHeight,
+                actionType
+            } = canvasItemMouseMoveData.value;
 
-        if ( !canvasItem ) return;
+            if ( !canvasItem ) return;
 
-        const { offsetX, offsetY } = event;
+            const { offsetX, offsetY } = event;
 
-        if (isResizing) {
-            const coordinates = {} as any;
-            const dimensions = {} as any;
+            if (isResizing) {
+                const coordinates = {} as any;
+                const dimensions = {} as any;
 
-            switch (actionType) {
-                case CanvasItemAction.RESIZE_TOP_LEFT:
-                    coordinates.x = initialX + offsetX - initialMouseX;
-                    coordinates.y = initialY + offsetY - initialMouseY;
-                    dimensions.width = initialWidth - offsetX + initialMouseX;
-                    dimensions.height = initialHeight - offsetY + initialMouseY;
-                    break;
-                case CanvasItemAction.RESIZE_BOTTOM_LEFT:
-                    coordinates.x = initialX + offsetX - initialMouseX;
-                    coordinates.y = initialY;
-                    dimensions.width = initialWidth - offsetX + initialMouseX;
-                    dimensions.height = initialHeight + offsetY - initialMouseY;
-                    break;
-                case CanvasItemAction.RESIZE_BOTTOM_RIGHT:
-                    coordinates.x = initialX;
-                    coordinates.y = initialY;
-                    dimensions.width = initialWidth + offsetX - initialMouseX;
-                    dimensions.height = initialHeight + offsetY - initialMouseY;
-                    break;
-                case CanvasItemAction.RESIZE_TOP_RIGHT:
-                    coordinates.x = initialX;
-                    coordinates.y = initialY + offsetY - initialMouseY;
-                    dimensions.width = initialWidth + offsetX - initialMouseX;
-                    dimensions.height = initialHeight - offsetY + initialMouseY;
-                    break;
-            }
-
-            if (!canvasItem.keyframes) {
-                canvasItemsStore.updateCanvasItemProperties(canvasItem.id, {
-                    coordinates,
-                    dimensions,
-                    rotation: canvasItem.rotation,
-                    opacity: canvasItem.opacity
-                });
-            }
-
-            if (canvasItem.keyframes) {
-                if (canvasItem.keyframes[timeStamp.value]) {
-                    canvasItem.keyframes[timeStamp.value].x = coordinates.x
-                    canvasItem.keyframes[timeStamp.value].y = coordinates.y
-                    canvasItem.keyframes[timeStamp.value].width = dimensions.width
-                    canvasItem.keyframes[timeStamp.value].height = dimensions.height
+                switch (actionType) {
+                    case CanvasItemAction.RESIZE_TOP_LEFT:
+                        coordinates.x = initialX + offsetX - initialMouseX;
+                        coordinates.y = initialY + offsetY - initialMouseY;
+                        dimensions.width = initialWidth - offsetX + initialMouseX;
+                        dimensions.height = initialHeight - offsetY + initialMouseY;
+                        break;
+                    case CanvasItemAction.RESIZE_BOTTOM_LEFT:
+                        coordinates.x = initialX + offsetX - initialMouseX;
+                        coordinates.y = initialY;
+                        dimensions.width = initialWidth - offsetX + initialMouseX;
+                        dimensions.height = initialHeight + offsetY - initialMouseY;
+                        break;
+                    case CanvasItemAction.RESIZE_BOTTOM_RIGHT:
+                        coordinates.x = initialX;
+                        coordinates.y = initialY;
+                        dimensions.width = initialWidth + offsetX - initialMouseX;
+                        dimensions.height = initialHeight + offsetY - initialMouseY;
+                        break;
+                    case CanvasItemAction.RESIZE_TOP_RIGHT:
+                        coordinates.x = initialX;
+                        coordinates.y = initialY + offsetY - initialMouseY;
+                        dimensions.width = initialWidth + offsetX - initialMouseX;
+                        dimensions.height = initialHeight - offsetY + initialMouseY;
+                        break;
                 }
+
+                if (!canvasItem.keyframes) {
+                    canvasItemsStore.updateCanvasItemProperties(canvasItem.id, {
+                        coordinates,
+                        dimensions,
+                        rotation: canvasItem.rotation,
+                        opacity: canvasItem.opacity
+                    });
+                }
+
+                if (canvasItem.keyframes) {
+                    if (canvasItem.keyframes[timeStamp.value]) {
+                        canvasItem.keyframes[timeStamp.value].x = coordinates.x
+                        canvasItem.keyframes[timeStamp.value].y = coordinates.y
+                        canvasItem.keyframes[timeStamp.value].width = dimensions.width
+                        canvasItem.keyframes[timeStamp.value].height = dimensions.height
+                    }
+                }
+                return;
             }
-            return;
-        }
 
-        let x = initialX + offsetX - initialMouseX;
-        let y = initialY + offsetY - initialMouseY;
+            let x = initialX + offsetX - initialMouseX;
+            let y = initialY + offsetY - initialMouseY;
 
-        if (magnetise.value) {
-            [x, y] = stickCanvasItemToImportantPositions(x, y, canvasItem, canvasItems.value);
-        }
-
-        if(canvasItem.keyframes) {
-            if (canvasItem.keyframes[timeStamp.value]) {
-                canvasItem.keyframes[timeStamp.value].x = x
-                canvasItem.keyframes[timeStamp.value].y = y
+            if (magnetise.value) {
+                [x, y] = stickCanvasItemToImportantPositions(x, y, canvasItem, canvasItems.value);
             }
-            return;
-        }
 
-        canvasItemsStore.moveCanvasItem(canvasItem.id, x, y)
+            if(canvasItem.keyframes) {
+                if (canvasItem.keyframes[timeStamp.value]) {
+                    canvasItem.keyframes[timeStamp.value].x = x
+                    canvasItem.keyframes[timeStamp.value].y = y
+                }
+                return;
+            }
+
+            canvasItemsStore.moveCanvasItem(canvasItem.id, x, y);
+        })();
+        canvasContextStore.renderCanvas();
     }
 
     function resetCanvasItemMouseMoveAction() {
@@ -244,6 +250,7 @@ export const useCanvasUtilsStore = defineStore('canvasUtilsStore', () => {
         canvasItem.preview.start = offsetX;
         canvasItem.preview.id = Math.random();
         canvasItem.start = offsetX * RemToMilliSeconds;
+        canvasContextStore.renderCanvas();
         return canvasItem;
     }
 
@@ -255,6 +262,7 @@ export const useCanvasUtilsStore = defineStore('canvasUtilsStore', () => {
         canvasItem.start = start * RemToMilliSeconds;
         canvasItem.duration = duration * RemToMilliSeconds;
         canvasItem.preview.id = Math.random();
+        canvasContextStore.renderCanvas();
         return canvasItem;
     }
 
