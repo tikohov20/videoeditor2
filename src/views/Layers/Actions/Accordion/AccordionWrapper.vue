@@ -2,7 +2,6 @@
 import LayerAccordion from "@/views/Layers/Actions/Accordion/Accordion.vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faTrashCan } from "@fortawesome/free-solid-svg-icons";
-import Keyframes from "@/views/Layers/Keyframes/Keyframes.vue";
 import { CanvasItem } from "@/types.ts";
 import Transform from "@/views/Layers/Actions/Transform/Transform.vue";
 interface Props {
@@ -30,7 +29,7 @@ const emit = defineEmits(['update:visible', 'delete-layer']);
     </template>
 
     <template #transform>
-      <Transform />
+      <Transform :layer="layer" />
     </template>
   </LayerAccordion>
 </template>

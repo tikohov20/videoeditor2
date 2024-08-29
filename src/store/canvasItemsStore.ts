@@ -170,6 +170,36 @@ export const useCanvasItemsStore = defineStore('canvasItems', {
             canvasItem.y = y;
 
             return canvasItem as CanvasItem;
+        },
+        addOrRemoveKeyFrameToCanvasItem(id: number, timeStamp: number) {
+            const canvasItem = this.canvasItem(id);
+
+            if(!canvasItem) return;
+
+            if (!canvasItem.keyframes) {
+                canvasItem.keyframes = {};
+            }
+
+            if(!canvasItem.keyframes[timeStamp]) {
+                canvasItem.keyframes[timeStamp] = {
+                    x: canvasItem.x,
+                    y: canvasItem.y,
+                    width: canvasItem.width,
+                    height: canvasItem.height,
+                    opacity: canvasItem.opacity,
+                    rotation: canvasItem.rotation
+                };
+
+                if(!canvasItem.keyframes[0]) {
+                    canvasItem.keyframes[0] = { ...canvasItem.keyframes[timeStamp] }
+                }
+            } else {
+                delete canvasItem.keyframes[timeStamp];
+            }
+
+            if(!Object.keys(canvasItem.keyframes).length) {
+                canvasItem.keyframes = null;
+            }
         }
     }
 })

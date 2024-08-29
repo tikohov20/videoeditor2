@@ -47,6 +47,8 @@ export function renderTimestamp(
                 renderItem.y = Math.round(number(keyFrameresult.y));
                 renderItem.width = Math.round(number(keyFrameresult.width));
                 renderItem.height = Math.round(number(keyFrameresult.height));
+                renderItem.opacity = number(keyFrameresult.opacity.toFixed(2));
+                renderItem.rotation = Math.round(number(keyFrameresult.rotation));
 
                 keyFrameMatrix = getTransformationMatrix({
                     x: number(keyFrameresult.x),
@@ -61,7 +63,7 @@ export function renderTimestamp(
                 });
             }
         }
-        context.setTransform(renderItem.matrix);
+        context.setTransform(keyFrameMatrix || renderItem.matrix);
 
         // x: 0, y: 0 is top left corner, real x and y are controlled through the transformation matrix
         context.drawImage(itemFrame, 0, 0);
@@ -69,7 +71,7 @@ export function renderTimestamp(
 
         context.resetTransform();
         if (drawTools && renderItem.isActive) {
-            drawItemEditBox(context, renderItem)
+            drawItemEditBox(context, {...renderItem, ...keyFrameresult})
         }
         context.resetTransform();
     }

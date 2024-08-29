@@ -16,6 +16,7 @@ function handleFile(e: Event) {
   if (files.length) {
     const file = files[0];
     if (!props.allowedTypes.includes(file.type)) {
+      console.log(file.type);
       throw "File type not supported sad";
     }
 

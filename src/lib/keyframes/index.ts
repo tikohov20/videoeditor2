@@ -1,21 +1,13 @@
 import { number } from "mathjs";
+import { KeyFrames } from "@/lib/shared/types.ts";
 
-interface Keyframes {
-    [key: number]: {
-        width?: number,
-        height?: number,
-        x?: number,
-        y?: number,
-    }
-}
-
-const fields = ['width', 'height', 'x', 'y'];
+const fields = ['width', 'height', 'x', 'y', 'opacity', 'rotation'];
 
 function animationFunction(delta: number, value: number) {
     return delta * value;
 }
 
-export function handleKeyframes(timestamp: number, keyframes: Keyframes) {
+export function handleKeyframes(timestamp: number, keyframes: KeyFrames) {
     const keyFrameTimestamps = Object.keys(keyframes)
         .map(time => +time)
         .sort((a, b) => a - b);
@@ -43,12 +35,3 @@ export function handleKeyframes(timestamp: number, keyframes: Keyframes) {
         return previousValue;
     }, {});
 }
-
-
-
-
-async function testing() {
-
-}
-
-testing();

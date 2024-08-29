@@ -47,6 +47,9 @@ h1 {
 .input:focus-visible {
   border-color: #266dcd;
 }
+.input:disabled {
+  cursor: not-allowed;
+}
 button {
   border-radius: 8px;
   border: 1px solid transparent;

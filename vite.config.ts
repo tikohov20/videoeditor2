@@ -38,5 +38,8 @@ export default defineConfig({
                 resources: 'usable',
             },
         },
+        coverage: {
+            provider: 'v8'
+        },
     },
 })

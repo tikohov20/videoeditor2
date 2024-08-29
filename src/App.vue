@@ -50,8 +50,10 @@ window.addEventListener('keydown', function(ev: KeyboardEvent) {
   isPreviousMetaOrCtrl = ev.metaKey || ev.ctrlKey;
 
   if(isPreviousMetaOrCtrl && ev.code === "KeyZ") {
-    ev.stopImmediatePropagation();
-    actionHistoryStore.moveBack();
+    if (ev.target instanceof HTMLBodyElement){
+      ev.preventDefault();
+      actionHistoryStore.moveBack();
+    }
   }
 });
 
@@ -97,7 +99,7 @@ async function handleAddFileToCanvas(file: ParsedFile) {
         <TimeLineContainer />
       </div>
       <div>
-        <Upload @upload="handleUpload" v-model="files" :allowed-types="['image/jpeg', 'image/png', 'image/gif']"/>
+        <Upload @upload="handleUpload" v-model="files" :allowed-types="['image/jpeg', 'image/png', 'image/gif', 'video/mp4']"/>
         <button @click="exportCanvasMP4">Download</button>
         <button @click="actionHistoryStore.moveBack">Back</button>
       </div>

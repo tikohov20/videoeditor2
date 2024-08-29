@@ -1,35 +1,21 @@
 <script setup lang="ts">
 import { computed, toRefs } from "vue";
-import {CanvasItem} from "../../types.ts";
-import Keyframes from "./Keyframes/Keyframes.vue";
-import { useTimeStore } from "../../store/timeStore.ts";
+import { CanvasItem } from "@/types.ts";
 import { useKeyFramesStore } from "@/store/canvas/canvasItems/keyFramesStore.ts";
 
 interface Props {
   canvasItem: CanvasItem | null
 }
 
+const keyFramesStore = useKeyFramesStore();
+
 const props = defineProps<Props>();
 const emits = defineEmits(['input']);
 const { canvasItem } = toRefs(props);
-const timeStore = useTimeStore();
-
-const keyFramesStore = useKeyFramesStore();
 
 const isDisabled = computed(() => {
   return !!keyFramesStore.getKeyFrames(canvasItem.value?.id);
 });
-
-const keyFrames = computed(
-    {
-      get() {
-        return keyFramesStore.getKeyFrames(canvasItem.value?.id);
-      },
-      set(e) {
-        return keyFramesStore.setKeyFrames(canvasItem.value?.id, e);
-      }
-    }
-);
 
 const canvasItemLayout = computed(
     {
@@ -71,22 +57,6 @@ function handleInput(name: string, e: HtmlInputEvent) {
   canvasItemLayout.value = {
     ...canvasItemLayout.value,
     [path[0]]: Number(e.target.value)
-  }
-}
-
-function handleAddKeyframe(canvasItem: CanvasItem | null) {
-  if (!canvasItem) return;
-
-  if (!canvasItem.keyframes) {
-    canvasItem.keyframes = {};
-  }
-  if(!canvasItem.keyframes[timeStore.timeStamp]) {
-    canvasItem.keyframes[timeStore.timeStamp] = {
-      x: canvasItem.x,
-      y: canvasItem.y,
-      width: canvasItem.width,
-      height: canvasItem.height
-    };
   }
 }
 </script>
@@ -179,18 +149,6 @@ function handleAddKeyframe(canvasItem: CanvasItem | null) {
                 v-model="canvasItemLayout.opacity"
                 @input="handleInput('opacity', $event as HtmlInputEvent)"
             />
-          </div>
-        </div>
-        <div class="form-item keyframes-form-item">
-          <div class="keyframes-hat">
-            <label>
-              Key Frames
-            </label>
-            <a v-if="canvasItem.keyframes" @click="canvasItem.keyframes = null">Delete</a>
-          </div>
-          <div>
-            <Keyframes v-if="canvasItem.keyframes" v-model:key-frames="keyFrames" />
-            <button @click="() => handleAddKeyframe(canvasItem)" class="add-keyframe-button">+ Keyframe</button>
           </div>
         </div>
       </div>

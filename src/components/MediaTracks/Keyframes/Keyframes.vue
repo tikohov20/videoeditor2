@@ -16,7 +16,7 @@ const handleClick = ({ time }: { time: number }) => {
 
 <template>
   <div class="keyframes">
-    <Keyframe @click="handleClick" v-for="(keyFrame, key) of keyFrames" :key-frame="keyFrame" :time="key"  />
+    <Keyframe @click="handleClick" v-for="(keyFrame, key) of keyFrames" :key-frame="keyFrame" :time="Number(key)"  />
   </div>
 </template>
 

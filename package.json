@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "vitest",
+    "coverage": "vitest --coverage",
     "dev": "vite --host",
     "build": "vue-tsc && vite build",
     "preview": "vite preview"
@@ -19,6 +20,7 @@
     "canvas": "^2.11.2",
     "mathjs": "^12.4.1",
     "mp4-muxer": "^3.0.5",
+    "mp4box": "^0.5.2",
     "omggif": "^1.0.10",
     "pinia": "^2.1.7",
     "sass": "^1.69.5",
@@ -27,6 +29,7 @@
   "devDependencies": {
     "@types/omggif": "^1.0.5",
     "@vitejs/plugin-vue": "^4.5.0",
+    "@vitest/coverage-v8": "^1.6.0",
     "@vitest/ui": "^1.6.0",
     "@vue/test-utils": "^2.4.6",
     "jsdom": "^24.1.0",

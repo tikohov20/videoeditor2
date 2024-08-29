@@ -4,7 +4,7 @@ import { RenderItem } from "./types.ts";
 import { Canvas } from "canvas";
 
 export async function createImageBitMapFromHtmlImg(img :HTMLImageElement): Promise<ImageBitmap> {
-    const canvas = new OffscreenCanvas(img.width, img.height);
+    const canvas = getOffscreenCanvas(img.width, img.height);
     const ctx = canvas.getContext("2d", {
         desynchronized: true
     });
@@ -103,4 +103,8 @@ export function getArrayBufferFromFile(file: File): Promise<ArrayBuffer> {
             reject("Error parsing file")
         }
     });
+}
+
+export function getOffscreenCanvas(width: number, height: number): OffscreenCanvas {
+    return window.OffscreenCanvas ? new OffscreenCanvas(width, height) : (new Canvas(width, height) as any);
 }

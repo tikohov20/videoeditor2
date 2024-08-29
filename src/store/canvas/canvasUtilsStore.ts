@@ -209,6 +209,7 @@ export const useCanvasUtilsStore = defineStore('canvasUtilsStore', () => {
                 }
 
                 if (canvasItem.keyframes) {
+                    //TODO move to store :333 no direct update canvasItem... FUCK IM DUMB
                     if (canvasItem.keyframes[timeStamp.value]) {
                         canvasItem.keyframes[timeStamp.value].x = coordinates.x
                         canvasItem.keyframes[timeStamp.value].y = coordinates.y

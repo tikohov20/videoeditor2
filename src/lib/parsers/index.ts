@@ -1,6 +1,8 @@
-import { getFrame as getImageFrame, parse as parseImage } from "./image.ts";
+import { parse as parseImage, getFrame as getImageFrame } from "./image.ts";
 import { parse as parseGif, getFrame as getGifFrame } from "./gif.ts";
 import { parse as parseText, getFrame as getTextFrame } from "./text.ts";
+import { parse as parseVideo } from "./video.ts";
+
 import {
     CanvasSize,
     HtmlFileTypes,
@@ -21,6 +23,8 @@ export async function parse(file: File | string, canvasSize: CanvasSize): Promis
                 return await parseImage(file, canvasSize);
             case HtmlFileTypes.IMAGE_GIF:
                 return await parseGif(file, canvasSize)
+            case HtmlFileTypes.VIDEO_MP4:
+                return await parseVideo(file, canvasSize)
             default:
                 throw "File Type Unsupported"
         }

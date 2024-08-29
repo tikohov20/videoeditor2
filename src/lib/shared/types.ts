@@ -5,7 +5,9 @@ export enum FileTypes {
 export enum HtmlFileTypes {
     IMAGE_PNG = "image/png",
     IMAGE_JPEG = "image/jpeg",
-    IMAGE_GIF = "image/gif"
+    IMAGE_GIF = "image/gif",
+    VIDEO_MP4 = 'video/mp4',
+    VIDEO_MOV = 'video/quicktime'
 }
 
 // canvas data
@@ -67,7 +69,9 @@ export interface KeyFrame {
     width?: number,
     height?: number,
     x?: number,
-    y?: number
+    y?: number,
+    rotation?: number,
+    opacity?: number,
 }
 
 // interface KeyFrame {
