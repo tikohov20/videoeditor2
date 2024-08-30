@@ -20,10 +20,12 @@ export async function parse(file: File | string, canvasSize: CanvasSize): Promis
         switch (type) {
             case HtmlFileTypes.IMAGE_PNG:
             case HtmlFileTypes.IMAGE_JPEG:
+            case HtmlFileTypes.IMAGE_WEBP:
                 return await parseImage(file, canvasSize);
             case HtmlFileTypes.IMAGE_GIF:
                 return await parseGif(file, canvasSize)
             case HtmlFileTypes.VIDEO_MP4:
+            case HtmlFileTypes.VIDEO_MOV:
                 return await parseVideo(file, canvasSize)
             default:
                 throw "File Type Unsupported"

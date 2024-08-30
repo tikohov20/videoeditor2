@@ -6,11 +6,15 @@ import {
     urlFromImageData
 } from "../shared/helpers.ts";
 import {
-    CanvasSize, DefaultImagePreviewSize, DefaultOpacity, DefaultRotation,
+    CanvasSize,
+    DefaultImagePreviewSize,
+    DefaultOpacity,
+    DefaultRotation,
     DefaultStart,
     InitialX,
     InitialY,
-    RenderItemGif, RenderItemPreview,
+    RenderItemGif,
+    RenderItemPreview,
     RenderItemTypes
 } from "../shared/types.ts";
 
@@ -59,8 +63,7 @@ async function getCanvasData(parsedGif: GifReader, canvasSize: CanvasSize, name:
 }
 export async function parse(file: File, canvasSize: CanvasSize): Promise<RenderItemGif> {
     const parsedGif = new GifReader(new Uint8Array(await getArrayBufferFromFile(file)));
-    const parsedData = await getCanvasData(parsedGif, canvasSize, file.name);
-    return parsedData;
+    return await getCanvasData(parsedGif, canvasSize, file.name);
 }
 
 async function getPreviewData(previewImage: ImageData, id: number): Promise<RenderItemPreview> {

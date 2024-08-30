@@ -29,6 +29,7 @@ export function parse(file: File, canvasSize: CanvasSize): Promise<RenderItemIma
             },
             onFinish() {
                 decoder.flush().then(() => {
+                    decoder.close();
                     Promise.all(promiseArray).then((data) => {
                         console.log(data);
                     })

@@ -99,7 +99,7 @@ async function handleAddFileToCanvas(file: ParsedFile) {
         <TimeLineContainer />
       </div>
       <div>
-        <Upload @upload="handleUpload" v-model="files" :allowed-types="['image/jpeg', 'image/png', 'image/gif', 'video/mp4']"/>
+        <Upload @upload="handleUpload" v-model="files" :allowed-types="['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/quicktime']"/>
         <button @click="exportCanvasMP4">Download</button>
         <button @click="actionHistoryStore.moveBack">Back</button>
       </div>
